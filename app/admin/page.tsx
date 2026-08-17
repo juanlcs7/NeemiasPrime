@@ -4,7 +4,7 @@ import AdminDashboard from "@/components/admin-dashboard";
 
 export const dynamic="force-dynamic";
 export default async function AdminPage(){const supabase=await createClient();const {data:claims}=await supabase.auth.getClaims();const userId=claims?.claims?.sub;if(!userId)redirect("/entrar?retorno=/admin");const {data:profile}=await supabase.from("profiles").select("role,full_name").eq("id",userId).single();if(profile?.role!=="admin")redirect("/cliente");
-  const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+14);
+  const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+30);
   const [{data:appointments},{data:services},{data:professionals},{data:plans},{data:clients},{data:memberships}]=await Promise.all([
     supabase.from("appointments").select("id,starts_at,ends_at,status,payment_mode,client_id,services(id,name,price_cents),professionals(id,name),profiles!appointments_client_id_fkey(full_name,phone,booking_blocked_until)").gte("starts_at",start.toISOString()).lt("starts_at",end.toISOString()).order("starts_at"),
     supabase.from("services").select("id,name,price_cents,duration_minutes,active,display_order").order("display_order"),
