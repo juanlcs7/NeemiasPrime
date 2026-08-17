@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { PrimeArrowIcon } from "@/components/prime-icons";
 import { CSSProperties, FormEvent, MouseEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -103,7 +104,7 @@ function EntrarForm() {
           <span>Agende com Breno, Agatha, Matheus ou Neemias.</span>
         </div>
         <div className="auth-availability"><small>AGENDA ONLINE</small><strong><i /> Horários em tempo real</strong></div>
-        <div className="auth-place">BELFORD ROXO · RJ <b>↗</b></div>
+        <div className="auth-place">BELFORD ROXO · RJ <b><PrimeArrowIcon /></b></div>
       </section>
 
       <section className="auth-form-side">
