@@ -54,7 +54,7 @@ export default function ClientDashboard({profile,services,professionals,appointm
   const morning=slots.filter(item=>Number(time(item).slice(0,2))<12), afternoon=slots.filter(item=>{const h=Number(time(item).slice(0,2));return h>=12&&h<18}), evening=slots.filter(item=>Number(time(item).slice(0,2))>=18);
 
   return <main className={`${styles.root} portal-shell`}>
-    <aside className="portal-side"><Link href="/" className="prime-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={48} height={48}/><span>NEEMIAS <b>PRIME</b></span></Link><nav><a className="active" href="#inicio"><i>⌂</i> Visão geral</a><a href="#agendar"><i>＋</i> Agendar</a><Link href="/cliente/agendamentos"><i>◷</i> Meus agendamentos</Link><a href="#plano"><i>♙</i> Meu plano</a>{profile?.role==="admin"&&<Link href="/admin"><i>▦</i> Administração</Link>}</nav><Link className="logout" href="/sair">Sair da conta</Link></aside>
+    <aside className="portal-side"><Link href="/" className="prime-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={48} height={48}/><span>NEEMIAS <b>PRIME</b></span></Link><nav><a className="active" href="#inicio"><i>⌂</i> Visão geral</a><a href="#agendar"><i>＋</i> Agendar</a><Link prefetch={false} href="/cliente/agendamentos"><i>◷</i> Meus agendamentos</Link><a href="#plano"><i>♙</i> Meu plano</a>{profile?.role==="admin"&&<Link prefetch={false} href="/admin"><i>▦</i> Administração</Link>}</nav><Link className="logout" href="/sair">Sair da conta</Link></aside>
     <section className="portal-main">
       <header className="portal-top"><Link href="/" className="mobile-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={35} height={35}/><b>NEEMIAS PRIME</b></Link><div><small>ÁREA DO CLIENTE</small><strong>{profile?.full_name||"Cliente Prime"}</strong></div><span className="client-avatar">{(profile?.full_name||"NP").split(" ").slice(0,2).map(x=>x[0]).join("")}</span></header>
       <div className="portal-content" id="inicio">
@@ -72,10 +72,10 @@ export default function ClientDashboard({profile,services,professionals,appointm
           </div>}{feedback&&<div className="inline-feedback">{feedback}<button onClick={()=>setFeedback("")}>×</button></div>}</section>
 
         <section id="plano" className="membership-card"><div><p className="metal-kicker">MEU CLUBE</p><h2>{membership?.plans?.name||"Mais frequência. Mais presença."}</h2><p>{membership?"Seu benefício aparece automaticamente nos serviços e dias cobertos.":"Conheça os planos para manter corte e barba sempre em dia."}</p></div>{membership?<strong>{money(membership.plans?.price_cents||0)}<small>/mês</small></strong>:<a href="https://wa.me/5521959438832" target="_blank">CONHECER PLANOS →</a>}</section>
-        <Link href="/cliente/agendamentos" className="appointments-shortcut"><span>◷</span><div><small>SEUS HORÁRIOS EM UM SÓ LUGAR</small><strong>Ver meus agendamentos</strong><p>Acompanhe, cancele ou reagende seus atendimentos.</p></div><i>→</i></Link>
+        <Link prefetch={false} href="/cliente/agendamentos" className="appointments-shortcut"><span>◷</span><div><small>SEUS HORÁRIOS EM UM SÓ LUGAR</small><strong>Ver meus agendamentos</strong><p>Acompanhe, cancele ou reagende seus atendimentos.</p></div><i>→</i></Link>
       </div>
     </section>
-    <nav className="mobile-nav"><a href="#inicio"><i>⌂</i><span>Início</span></a><a className="book-tab" href="#agendar"><i>＋</i><span>Agendar</span></a><Link href="/cliente/agendamentos"><i>◷</i><span>Horários</span></Link><a href="#plano"><i>♙</i><span>Plano</span></a></nav>
+    <nav className="mobile-nav"><a href="#inicio"><i>⌂</i><span>Início</span></a><a className="book-tab" href="#agendar"><i>＋</i><span>Agendar</span></a><Link prefetch={false} href="/cliente/agendamentos"><i>◷</i><span>Horários</span></Link><a href="#plano"><i>♙</i><span>Plano</span></a></nav>
     {success&&<div className="booking-success"><section><div className="success-mark">✓</div><p>HORÁRIO RESERVADO</p><h2>Está marcado!</h2><span>{selected?.name} com <b>{selectedProfessional?.name}</b><br/>{selectedDay?.week}, {selectedDay?.day} de {selectedDay?.month} às <b>{time(slot)}</b></span><button onClick={()=>location.reload()}>VER MEU AGENDAMENTO <i>→</i></button></section></div>}
   </main>;
 }

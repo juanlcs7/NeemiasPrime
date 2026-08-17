@@ -138,7 +138,7 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
       <Link href="/" className={styles.brand}><Image src="/logo-neemias-prime.png" width={42} height={42} alt="Neemias Prime"/><span>NEEMIAS<small>PRIME</small></span></Link>
       <div className={styles.adminTag}><span>{initials(adminName)}</span><div><strong>{adminName || "Administrador"}</strong><small>Administração</small></div></div>
       <nav>{nav.map((item) => <button type="button" key={item.id} className={tab === item.id ? styles.activeNav : ""} onClick={() => setTab(item.id)}><i>{item.short}</i>{item.label}{item.id === "agenda" && activeToday.length > 0 && <b>{activeToday.length}</b>}</button>)}</nav>
-      <div className={styles.sideFooter}><Link href="/cliente">Ver área do cliente</Link><Link href="/sair">Sair da conta</Link></div>
+      <div className={styles.sideFooter}><Link prefetch={false} href="/cliente">Ver área do cliente</Link><Link href="/sair">Sair da conta</Link></div>
     </aside>
 
     <header className={styles.mobileHeader}><Link href="/"><Image src="/logo-neemias-prime.png" width={38} height={38} alt="Neemias Prime"/></Link><div><small>Administração</small><strong>{adminName?.split(" ")[0]}</strong></div><Link href="/sair" className={styles.mobileLogout}>Sair</Link></header>

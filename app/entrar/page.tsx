@@ -49,21 +49,27 @@ function EntrarForm() {
     if (mode === "register") {
       const fullName = String(form.get("name") || "").trim();
       const phone = String(form.get("phone") || "").trim();
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: fullName, phone }, emailRedirectTo: `${location.origin}/auth/callback?next=/cliente` },
+      const response = await fetch("/auth/session", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "register", email, password, fullName, phone }),
       });
-      if (signUpError) setError(signUpError.message);
-      else if (signUpData.session) {
+      const result = await response.json();
+      if (!response.ok) setError(result.message || "Não foi possível criar a conta.");
+      else if (!result.needsConfirmation) {
         window.location.replace(search.get("retorno") || "/cliente");
       } else setConfirmationEmail(email);
     } else {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) setError("E-mail ou senha incorretos.");
+      const response = await fetch("/auth/session", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", email, password }),
+      });
+      const result = await response.json();
+      if (!response.ok) setError(result.message || "E-mail ou senha incorretos.");
       else {
-        // A navegação completa garante que os cookies recém-gravados sejam
-        // enviados já na primeira requisição da área protegida.
         window.location.replace(search.get("retorno") || "/cliente");
       }
     }
