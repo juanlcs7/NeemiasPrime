@@ -96,7 +96,13 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
     event.preventDefault(); setBusy(id + "service");
     const form = new FormData(event.currentTarget);
     const payload = { name: String(form.get("name")), price_cents: Math.round(Number(form.get("price")) * 100), duration_minutes: Number(form.get("duration")), active: form.get("active") === "on" };
-    const { error } = await supabase.from("services").update(payload).eq("id", id);
+    const { error } = await supabase.rpc("admin_update_service", {
+      p_service_id: id,
+      p_name: payload.name,
+      p_price_cents: payload.price_cents,
+      p_duration_minutes: payload.duration_minutes,
+      p_active: payload.active,
+    });
     setBusy("");
     if (error) return notify(`Erro ao salvar: ${error.message}`);
     setServices((rows) => rows.map((row) => row.id === id ? { ...row, ...payload } : row));
@@ -104,7 +110,9 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
   }
 
   async function toggleProfessional(id: string, active: boolean) {
-    setBusy(id + "pro"); const { error } = await supabase.from("professionals").update({ active }).eq("id", id); setBusy("");
+    setBusy(id + "pro");
+    const { error } = await supabase.rpc("admin_set_professional_active", { p_professional_id: id, p_active: active });
+    setBusy("");
     if (error) return notify(`Erro ao atualizar profissional: ${error.message}`);
     setPros((rows) => rows.map((row) => row.id === id ? { ...row, active } : row)); notify(active ? "Profissional disponível para agendamentos." : "Profissional pausado na agenda.");
   }
