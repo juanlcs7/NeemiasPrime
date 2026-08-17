@@ -5,7 +5,7 @@ import ClientDashboard from "@/components/client-dashboard";
 export const dynamic = "force-dynamic";
 
 export default async function ClientePage() {
-  const supabase=await createClient(); const {data:claims}=await supabase.auth.getClaims(); const userId=claims?.claims?.sub;
+  const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); const userId=user?.id;
   if(!userId) redirect("/entrar");
   const [{data:profile},{data:services},{data:professionals},{data:appointments},{data:membership}]=await Promise.all([
     supabase.from("profiles").select("id,full_name,phone,role,booking_blocked_until").eq("id",userId).single(),

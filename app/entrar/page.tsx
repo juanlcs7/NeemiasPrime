@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PrimeArrowIcon } from "@/components/prime-icons";
 import { CSSProperties, FormEvent, MouseEvent, Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./auth.module.css";
 
@@ -18,7 +18,6 @@ function EntrarForm() {
   const [loading, setLoading] = useState(false);
   const [sentEmail, setSentEmail] = useState("");
   const [confirmationEmail, setConfirmationEmail] = useState("");
-  const router = useRouter();
   const search = useSearchParams();
 
   function changeMode(nextMode: AuthMode) {
@@ -57,13 +56,16 @@ function EntrarForm() {
       });
       if (signUpError) setError(signUpError.message);
       else if (signUpData.session) {
-        router.push(search.get("retorno") || "/cliente");
-        router.refresh();
+        window.location.replace(search.get("retorno") || "/cliente");
       } else setConfirmationEmail(email);
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) setError("E-mail ou senha incorretos.");
-      else { router.push(search.get("retorno") || "/cliente"); router.refresh(); }
+      else {
+        // A navegação completa garante que os cookies recém-gravados sejam
+        // enviados já na primeira requisição da área protegida.
+        window.location.replace(search.get("retorno") || "/cliente");
+      }
     }
     setLoading(false);
   }

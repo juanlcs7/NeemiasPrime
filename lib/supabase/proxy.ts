@@ -17,14 +17,34 @@ export async function updateSession(request: NextRequest) {
       },
     },
   );
-  const { data } = await supabase.auth.getClaims();
-  const loggedIn = Boolean(data?.claims);
+  // getUser valida e renova a sessão. Isso evita que uma troca de rota use
+  // um token antigo e mande o cliente de volta para o login.
+  const { data: { user } } = await supabase.auth.getUser();
+  const loggedIn = Boolean(user);
   const protectedRoute = request.nextUrl.pathname.startsWith("/cliente") || request.nextUrl.pathname.startsWith("/admin");
+
+  function redirectWithSession(url: URL) {
+    const redirectResponse = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
+  }
+
   if (protectedRoute && !loggedIn) {
     const url = request.nextUrl.clone();
     url.pathname = "/entrar";
     url.searchParams.set("retorno", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    return redirectWithSession(url);
+  }
+
+  // Links públicos ainda apontam para /entrar. Se a pessoa já estiver
+  // conectada, ela segue direto para a área dela sem precisar logar de novo.
+  if (request.nextUrl.pathname === "/entrar" && loggedIn) {
+    const requestedReturn = request.nextUrl.searchParams.get("retorno");
+    const destination = requestedReturn?.startsWith("/") ? requestedReturn : "/cliente";
+    const url = request.nextUrl.clone();
+    url.pathname = destination;
+    url.search = "";
+    return redirectWithSession(url);
   }
   return response;
 }

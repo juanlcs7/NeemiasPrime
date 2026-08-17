@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 
 export default async function AgendamentosPage() {
   const supabase=await createClient();
-  const {data:claims}=await supabase.auth.getClaims();
-  const userId=claims?.claims?.sub;
+  const {data:{user}}=await supabase.auth.getUser();
+  const userId=user?.id;
   if(!userId) redirect("/entrar?retorno=/cliente/agendamentos");
   const [{data:profile},{data:appointments},{data:professionals}]=await Promise.all([
     supabase.from("profiles").select("full_name,role,booking_blocked_until").eq("id",userId).single(),
