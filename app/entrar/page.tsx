@@ -50,13 +50,16 @@ function EntrarForm() {
     if (mode === "register") {
       const fullName = String(form.get("name") || "").trim();
       const phone = String(form.get("phone") || "").trim();
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { full_name: fullName, phone }, emailRedirectTo: `${location.origin}/auth/callback?next=/cliente` },
       });
       if (signUpError) setError(signUpError.message);
-      else setConfirmationEmail(email);
+      else if (signUpData.session) {
+        router.push(search.get("retorno") || "/cliente");
+        router.refresh();
+      } else setConfirmationEmail(email);
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) setError("E-mail ou senha incorretos.");
