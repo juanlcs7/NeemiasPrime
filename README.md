@@ -97,6 +97,8 @@ Se você já executou a migração principal anteriormente, execute também `sup
 
 Para ativar o botão de reagendamento em um banco que já estava configurado, execute também `supabase/migrations/20260813_reschedule_appointments.sql`. A função valida cliente, profissional, expediente, folgas, bloqueio e conflito de agenda antes de trocar o horário.
 
+Se o painel administrativo mostrar `new row violates row-level security policy for table "memberships"` ao vincular um plano, execute `supabase/migrations/20260817_fix_membership_admin_rls.sql`. A correção cria uma operação administrativa protegida e não apaga clientes, planos ou históricos.
+
 Se o banco mostrar o erro `payment_mode is of type payment_mode but expression is of type text`, execute `supabase/migrations/20260813_fix_payment_mode_cast.sql`. Essa correção recria somente a função de agendamento e não apaga horários ou clientes.
 
 ## Planos cadastrados
