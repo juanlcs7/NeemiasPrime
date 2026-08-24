@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 type AdminAction =
   | { action:"appointment_status"; appointmentId:string; status:string }
@@ -12,9 +12,15 @@ const appointmentStatuses = ["scheduled","confirmed","completed","cancelled","no
 function failure(message:string,status=400){return NextResponse.json({error:message},{status});}
 
 export async function POST(request:Request){
-  const supabase=await createClient();
-  const {data:{user}}=await supabase.auth.getUser();
-  if(!user)return failure("Sua sessão expirou. Entre novamente.",401);
+  const authorization=request.headers.get("authorization");
+  const token=authorization?.startsWith("Bearer ")?authorization.slice(7):null;
+  if(!token)return failure("Token de sessão não enviado.",401);
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if(!url||!key)return failure("Supabase não configurado no servidor.",500);
+  const supabase=createSupabaseClient(url,key,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const {data:{user},error:userError}=await supabase.auth.getUser(token);
+  if(userError||!user)return failure("Sua sessão não pôde ser validada. Entre novamente.",401);
 
   const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).single();
   if(profile?.role!=="admin")return failure("Acesso permitido somente para administradores.",403);
