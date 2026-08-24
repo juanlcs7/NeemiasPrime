@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { LandingEffects } from "@/components/landing-effects";
 import { PrimeArrowIcon } from "@/components/prime-icons";
+import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 const serviceCards = [
   { n:"01",name:"Corte",price:"R$ 40",note:"Clássico, social ou fade",mark:"C" },
@@ -19,14 +22,25 @@ const plans=[
   {name:"Prime Total",price:"149,90",caption:"Corte + barba",days:"Ilimitados"},
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("role,full_name").eq("id", user.id).maybeSingle()
+    : { data: null };
+  const isAdmin = profile?.role === "admin";
+
   return <main className="landing new-landing">
     <LandingEffects />
     <div className="landing-cursor-glow" aria-hidden="true" />
     <header className="neo-nav">
       <Link href="/" className="prime-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={46} height={46}/><span>NEEMIAS <b>PRIME</b></span></Link>
       <nav><a href="#experiencia">Experiência</a><a href="#servicos">Serviços</a><a href="#equipe">Equipe</a><a href="#planos">Clube</a></nav>
-      <div><Link className="nav-login" href="/entrar">Entrar</Link><Link className="lime-button" href="/entrar?retorno=/cliente">AGENDAR <PrimeArrowIcon /></Link></div>
+      <div className="nav-actions">
+        {isAdmin && <Link className="nav-admin" href="/admin"><span aria-hidden="true">A</span><b>ADMINISTRAÇÃO</b></Link>}
+        <Link className="nav-login" href={user ? "/cliente" : "/entrar"}>{user ? "Minha conta" : "Entrar"}</Link>
+        <Link className="lime-button nav-book" href="/entrar?retorno=/cliente"><span className="nav-book-label">AGENDAR</span><PrimeArrowIcon /></Link>
+      </div>
     </header>
 
     <section className="neo-hero">
