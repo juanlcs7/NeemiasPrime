@@ -25,6 +25,17 @@ function EntrarForm() {
     return requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/cliente";
   }
 
+  async function syncSession(accessToken:string,refreshToken:string) {
+    const response=await fetch("/auth/session",{
+      method:"POST",
+      credentials:"include",
+      cache:"no-store",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"sync",accessToken,refreshToken}),
+    });
+    if(!response.ok)throw new Error("Não foi possível sincronizar sua sessão.");
+  }
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
     setError("");
@@ -63,12 +74,16 @@ function EntrarForm() {
       });
       if(registerError)setError(registerError.message||"Não foi possível criar a conta.");
       else if(data.session){
-        window.location.replace(destination());
+        try{await syncSession(data.session.access_token,data.session.refresh_token);window.location.replace(destination());}
+        catch{await supabase.auth.signOut();setError("Não foi possível concluir o acesso. Tente novamente.");}
       } else setConfirmationEmail(email);
     } else {
       const {data,error:loginError}=await supabase.auth.signInWithPassword({email,password});
       if(loginError||!data.session)setError("E-mail ou senha incorretos.");
-      else window.location.replace(destination());
+      else {
+        try{await syncSession(data.session.access_token,data.session.refresh_token);window.location.replace(destination());}
+        catch{await supabase.auth.signOut();setError("Não foi possível sincronizar sua sessão. Tente novamente.");}
+      }
     }
     setLoading(false);
   }

@@ -2,21 +2,19 @@ import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
 type AuthBody = {
-  action?: "login" | "register";
+  action?: "login" | "register" | "sync";
   email?: string;
   password?: string;
   fullName?: string;
   phone?: string;
+  accessToken?: string;
+  refreshToken?: string;
 };
 
 export async function POST(request: NextRequest) {
   const body = await request.json() as AuthBody;
   const email = body.email?.trim() || "";
   const password = body.password || "";
-
-  if (!email || !password || !["login", "register"].includes(body.action || "")) {
-    return NextResponse.json({ ok: false, message: "Dados de acesso inválidos." }, { status: 400 });
-  }
 
   const response = NextResponse.json(
     { ok: true },
@@ -38,6 +36,29 @@ export async function POST(request: NextRequest) {
       },
     },
   );
+
+  if (body.action === "sync") {
+    if (!body.accessToken || !body.refreshToken) {
+      return NextResponse.json({ ok: false, message: "Sessão incompleta." }, { status: 400 });
+    }
+    const { data, error } = await supabase.auth.setSession({
+      access_token: body.accessToken,
+      refresh_token: body.refreshToken,
+    });
+    if (error || !data.user) {
+      return NextResponse.json({ ok: false, message: "Não foi possível sincronizar a sessão." }, { status: 401 });
+    }
+    const result = NextResponse.json(
+      { ok: true },
+      { headers: { "Cache-Control": "no-store, max-age=0" } },
+    );
+    response.cookies.getAll().forEach((cookie) => result.cookies.set(cookie));
+    return result;
+  }
+
+  if (!email || !password || !["login", "register"].includes(body.action || "")) {
+    return NextResponse.json({ ok: false, message: "Dados de acesso inválidos." }, { status: 400 });
+  }
 
   if (body.action === "register") {
     const { data, error } = await supabase.auth.signUp({
