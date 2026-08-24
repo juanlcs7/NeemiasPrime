@@ -4,7 +4,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import styles from "./admin-dashboard.module.css";
 
 type Item = Record<string, any>;
@@ -27,7 +26,7 @@ const nav: { id: Tab; label: string; short: string }[] = [
   { id: "equipe", label: "Equipe", short: "EQ" },
 ];
 
-export default function AdminDashboard({ adminName, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
+export default function AdminDashboard({ adminName, adminAccessToken, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
   const [tab, setTab] = useState<Tab>("overview");
   const [appointments, setAppointments] = useState<Item[]>(initialAppointments);
   const [services, setServices] = useState<Item[]>(initialServices);
@@ -82,9 +81,8 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
   function notify(message: string) { setFeedback(message); window.setTimeout(() => setFeedback(""), 4000); }
 
   async function adminAction(payload:Record<string,unknown>){
-    const {data:{session}}=await createClient().auth.getSession();
-    if(!session?.access_token)throw new Error("Não foi possível validar sua sessão. Atualize a página e tente novamente.");
-    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${session.access_token}`},body:JSON.stringify(payload)});
+    if(!adminAccessToken)throw new Error("Sessão administrativa indisponível. Entre novamente.");
+    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${adminAccessToken}`},body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
     if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");
     return result;
