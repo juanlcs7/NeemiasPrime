@@ -4,7 +4,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import styles from "./admin-dashboard.module.css";
 
 type Item = Record<string, any>;
@@ -28,7 +27,6 @@ const nav: { id: Tab; label: string; short: string }[] = [
 ];
 
 export default function AdminDashboard({ adminName, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
-  const supabase = createClient();
   const [tab, setTab] = useState<Tab>("overview");
   const [appointments, setAppointments] = useState<Item[]>(initialAppointments);
   const [services, setServices] = useState<Item[]>(initialServices);
@@ -82,10 +80,17 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
 
   function notify(message: string) { setFeedback(message); window.setTimeout(() => setFeedback(""), 4000); }
 
+  async function adminAction(payload:Record<string,unknown>){
+    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
+    if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");
+    return result;
+  }
+
   async function changeStatus(id: string, nextStatus: string) {
     if (nextStatus === "no_show" && !window.confirm("Marcar como não compareceu? O cliente ficará bloqueado por 24 horas.")) return;
     setBusy(id + nextStatus);
-    const { error } = await supabase.rpc("admin_set_appointment_status", { p_appointment_id: id, p_status: nextStatus });
+    let error:Error|null=null;try{await adminAction({action:"appointment_status",appointmentId:id,status:nextStatus});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
     if (error) return notify(`Não foi possível atualizar: ${error.message}`);
     setAppointments((rows) => rows.map((row) => row.id === id ? { ...row, status: nextStatus } : row));
@@ -96,13 +101,7 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
     event.preventDefault(); setBusy(id + "service");
     const form = new FormData(event.currentTarget);
     const payload = { name: String(form.get("name")), price_cents: Math.round(Number(form.get("price")) * 100), duration_minutes: Number(form.get("duration")), active: form.get("active") === "on" };
-    const { error } = await supabase.rpc("admin_update_service", {
-      p_service_id: id,
-      p_name: payload.name,
-      p_price_cents: payload.price_cents,
-      p_duration_minutes: payload.duration_minutes,
-      p_active: payload.active,
-    });
+    let error:Error|null=null;try{await adminAction({action:"service_update",serviceId:id,name:payload.name,priceCents:payload.price_cents,durationMinutes:payload.duration_minutes,active:payload.active});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
     if (error) return notify(`Erro ao salvar: ${error.message}`);
     setServices((rows) => rows.map((row) => row.id === id ? { ...row, ...payload } : row));
@@ -111,7 +110,7 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
 
   async function toggleProfessional(id: string, active: boolean) {
     setBusy(id + "pro");
-    const { error } = await supabase.rpc("admin_set_professional_active", { p_professional_id: id, p_active: active });
+    let error:Error|null=null;try{await adminAction({action:"professional_active",professionalId:id,active});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
     if (error) return notify(`Erro ao atualizar profissional: ${error.message}`);
     setPros((rows) => rows.map((row) => row.id === id ? { ...row, active } : row)); notify(active ? "Profissional disponível para agendamentos." : "Profissional pausado na agenda.");
@@ -119,13 +118,13 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
 
   async function assignPlan(clientId: string, planId: string) {
     setBusy(clientId + "plan");
-    const { data, error } = await supabase.rpc("admin_assign_membership", { p_client_id: clientId, p_plan_id: planId || null });
+    let data:any=null;let error:Error|null=null;try{data=await adminAction({action:"membership_assign",clientId,planId:planId||null});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
     if (error) return notify(`Erro ao atribuir plano: ${error.message}`);
     if (!planId) setMemberRows((rows) => rows.filter((row) => row.client_id !== clientId));
     else {
       const plan = plans.find((row: Item) => row.id === planId);
-      const updated = { id: data || crypto.randomUUID(), client_id: clientId, plan_id: planId, active: true, plans: { name: plan?.name } };
+      const updated = { id: data?.membershipId || crypto.randomUUID(), client_id: clientId, plan_id: planId, active: true, plans: { name: plan?.name } };
       setMemberRows((rows) => [...rows.filter((row) => row.client_id !== clientId), updated]);
     }
     notify(planId ? "Plano do cliente atualizado." : "Plano removido do cliente.");
