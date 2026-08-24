@@ -20,6 +20,11 @@ function EntrarForm() {
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const search = useSearchParams();
 
+  function destination() {
+    const requested = search.get("retorno");
+    return requested?.startsWith("/") && !requested.startsWith("//") ? requested : "/cliente";
+  }
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode);
     setError("");
@@ -49,29 +54,21 @@ function EntrarForm() {
     if (mode === "register") {
       const fullName = String(form.get("name") || "").trim();
       const phone = String(form.get("phone") || "").trim();
-      const response = await fetch("/auth/session", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "register", email, password, fullName, phone }),
+      const {data,error:registerError}=await supabase.auth.signUp({
+        email,password,
+        options:{
+          data:{full_name:fullName,phone},
+          emailRedirectTo:`${location.origin}/auth/callback?next=${encodeURIComponent(destination())}`,
+        },
       });
-      const result = await response.json();
-      if (!response.ok) setError(result.message || "Não foi possível criar a conta.");
-      else if (!result.needsConfirmation) {
-        window.location.replace(search.get("retorno") || "/cliente");
+      if(registerError)setError(registerError.message||"Não foi possível criar a conta.");
+      else if(data.session){
+        window.location.replace(destination());
       } else setConfirmationEmail(email);
     } else {
-      const response = await fetch("/auth/session", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "login", email, password }),
-      });
-      const result = await response.json();
-      if (!response.ok) setError(result.message || "E-mail ou senha incorretos.");
-      else {
-        window.location.replace(search.get("retorno") || "/cliente");
-      }
+      const {data,error:loginError}=await supabase.auth.signInWithPassword({email,password});
+      if(loginError||!data.session)setError("E-mail ou senha incorretos.");
+      else window.location.replace(destination());
     }
     setLoading(false);
   }
@@ -82,7 +79,7 @@ function EntrarForm() {
     const supabase = createClient();
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback?next=/cliente` },
+      options: { redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(destination())}` },
     });
     if (oauthError) {
       setError("O acesso com Google ainda não está disponível. Use seu e-mail e senha.");
