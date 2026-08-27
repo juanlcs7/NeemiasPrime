@@ -30,7 +30,7 @@ export default function RedefinirSenha() {
   return (
     <main className={`${styles.root} reset-auth`}>
       <section className="auth-scene" aria-label="Neemias Prime">
-        <Image src="/neemias-hero.webp" alt="Atendimento Neemias Prime" fill priority sizes="(max-width: 820px) 100vw, 54vw" /><div className="auth-scene-shade" />
+        <Image src="/neemias-prime-fachada-instagram.jpg" alt="Fachada real da Barbearia Neemias Prime" fill priority sizes="(max-width: 820px) 100vw, 54vw" /><div className="auth-scene-shade" />
         <Link href="/" className="auth-logo"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={46} height={46} /><span>NEEMIAS <b>PRIME</b></span></Link>
         <div className="auth-scene-copy"><p><i /> ACESSO SEGURO</p><h1>Nova senha,<br /><em>mesma experiência.</em></h1></div>
       </section>

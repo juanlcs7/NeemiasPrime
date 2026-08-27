@@ -23,7 +23,7 @@ function NavIcon({id}:{id:ClientSection}){
   return <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"/></svg>;
 }
 
-function initials(name:string){return(name||"NP").split(" ").filter(Boolean).slice(0,2).map(part=>part[0]).join("").toUpperCase();}
+function initials(name:string){return(name||"Cliente").split(" ").filter(Boolean).slice(0,2).map(part=>part[0]).join("").toUpperCase();}
 
 export function ClientSidebar({active,profileName,isAdmin,onNavigate}:Props){
   return <aside className={styles.sidebar}>

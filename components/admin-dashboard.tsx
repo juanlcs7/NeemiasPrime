@@ -3,7 +3,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "./admin-dashboard.module.css";
 
 type Item = Record<string, any>;
@@ -14,7 +14,7 @@ const dateKey = (value: string | Date) => new Intl.DateTimeFormat("en-CA", { tim
 const dayLabel = (value: string) => new Intl.DateTimeFormat("pt-BR", { weekday: "short", day: "2-digit", month: "short", timeZone: "America/Sao_Paulo" }).format(new Date(value)).replace(".", "");
 const timeLabel = (value: string) => new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }).format(new Date(value));
 const initials = (name = "Cliente") => name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
-const whatsapp = (phone = "") => `https://wa.me/55${phone.replace(/\D/g, "").replace(/^55/, "")}`;
+const whatsapp = (phone = "") => { const digits=phone.replace(/\D/g, ""); return `https://wa.me/${digits.startsWith("55")?digits:`55${digits}`}`; };
 const statusLabel: Record<string, string> = { scheduled: "Agendado", confirmed: "Confirmado", completed: "Concluído", cancelled: "Cancelado", no_show: "Não compareceu" };
 const statusTone: Record<string, string> = { scheduled: "blue", confirmed: "green", completed: "neutral", cancelled: "red", no_show: "orange" };
 
@@ -42,7 +42,9 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
   const [clientFilter, setClientFilter] = useState("all");
   const [serviceSearch, setServiceSearch] = useState("");
   const [serviceFilter, setServiceFilter] = useState("active");
-  const [clock] = useState(() => Date.now());
+  const [clock, setClock] = useState(() => Date.now());
+
+  useEffect(() => { const timer=window.setInterval(() => setClock(Date.now()), 30000); return () => window.clearInterval(timer); }, []);
 
   const today = dateKey(new Date());
   const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -90,6 +92,7 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
 
   async function changeStatus(id: string, nextStatus: string) {
     if (nextStatus === "no_show" && !window.confirm("Marcar como não compareceu? O cliente ficará bloqueado por 24 horas.")) return;
+    if (nextStatus === "cancelled" && !window.confirm("Cancelar este agendamento? Esta ação ficará registrada no histórico.")) return;
     setBusy(id + nextStatus);
     let error:Error|null=null;try{await adminAction({action:"appointment_status",appointmentId:id,status:nextStatus});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
@@ -137,14 +140,14 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
     <aside className={styles.sidebar}>
       <Link href="/" className={styles.brand}><Image src="/logo-neemias-prime.png" width={42} height={42} alt="Neemias Prime"/><span>NEEMIAS<small>PRIME</small></span></Link>
       <div className={styles.adminTag}><span>{initials(adminName)}</span><div><strong>{adminName || "Administrador"}</strong><small>Administração</small></div></div>
-      <nav>{nav.map((item) => <button type="button" key={item.id} className={tab === item.id ? styles.activeNav : ""} onClick={() => setTab(item.id)}><i>{item.short}</i>{item.label}{item.id === "agenda" && activeToday.length > 0 && <b>{activeToday.length}</b>}</button>)}</nav>
+      <nav>{nav.map((item) => <button type="button" key={item.id} aria-current={tab === item.id ? "page" : undefined} className={tab === item.id ? styles.activeNav : ""} onClick={() => setTab(item.id)}><i>{item.short}</i>{item.label}{item.id === "agenda" && activeToday.length > 0 && <b>{activeToday.length}</b>}</button>)}</nav>
       <div className={styles.sideFooter}><Link prefetch={false} href="/cliente">Ver área do cliente</Link><Link href="/sair">Sair da conta</Link></div>
     </aside>
 
     <header className={styles.mobileHeader}><Link href="/"><Image src="/logo-neemias-prime.png" width={38} height={38} alt="Neemias Prime"/></Link><div><small>Administração</small><strong>{adminName?.split(" ")[0]}</strong></div><Link href="/sair" className={styles.mobileLogout}>Sair</Link></header>
 
     <main className={styles.main}>
-      {feedback && <div className={styles.toast}><span>NP</span>{feedback}</div>}
+      {feedback && <div className={styles.toast} role="status" aria-live="polite"><span><Image src="/logo-neemias-prime.png" alt="" width={22} height={22}/></span>{feedback}</div>}
       {tab === "overview" && <Overview adminName={adminName} todayAppointments={todayAppointments} activeToday={activeToday} nextAppointment={nextAppointment} todayRevenue={todayRevenue} todayMembers={todayMembers} professionals={pros} openAgenda={openAgenda} setTab={setTab}/>} 
       {tab === "agenda" && <Agenda appointments={appointmentView} search={appointmentSearch} setSearch={setAppointmentSearch} dateFilter={dateFilter} setDateFilter={setDateFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} proFilter={proFilter} setProFilter={setProFilter} professionals={pros} busy={busy} changeStatus={changeStatus} clock={clock}/>} 
       {tab === "clientes" && <Clients clients={clientView} allClients={clients} plans={plans} memberships={membershipByClient} search={clientSearch} setSearch={setClientSearch} filter={clientFilter} setFilter={setClientFilter} busy={busy} assignPlan={assignPlan}/>} 
@@ -152,7 +155,7 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
       {tab === "equipe" && <Team professionals={pros} appointments={appointments} busy={busy} toggleProfessional={toggleProfessional} openAgenda={openAgenda}/>} 
     </main>
 
-    <nav className={styles.mobileNav}>{nav.map((item) => <button type="button" key={item.id} className={tab === item.id ? styles.activeMobile : ""} onClick={() => setTab(item.id)}><i>{item.short}</i><span>{item.label.replace("Visão geral", "Início")}</span></button>)}</nav>
+    <nav className={styles.mobileNav} aria-label="Navegação administrativa">{nav.map((item) => <button type="button" key={item.id} aria-current={tab === item.id ? "page" : undefined} className={tab === item.id ? styles.activeMobile : ""} onClick={() => setTab(item.id)}><i>{item.short}</i><span>{item.label.replace("Visão geral", "Início")}</span></button>)}</nav>
   </div>;
 }
 
@@ -204,7 +207,7 @@ function AppointmentCard({ appointment: a, busy, changeStatus, clock }: any) {
   const finished = ["completed", "cancelled", "no_show"].includes(a.status);
   return <article className={styles.appointmentCard}>
     <div className={styles.dateBlock}><strong>{timeLabel(a.starts_at)}</strong><span>{dayLabel(a.starts_at)}</span></div>
-    <div className={styles.personBlock}><span className={styles.avatar}>{initials(a.profiles?.full_name)}</span><div><strong>{a.profiles?.full_name || "Cliente"}</strong><a href={whatsapp(a.profiles?.phone)} target="_blank" rel="noreferrer">{a.profiles?.phone || "Sem telefone"} · WhatsApp</a></div></div>
+    <div className={styles.personBlock}><span className={styles.avatar}>{initials(a.profiles?.full_name)}</span><div><strong>{a.profiles?.full_name || "Cliente"}</strong>{a.profiles?.phone?<a href={whatsapp(a.profiles.phone)} target="_blank" rel="noreferrer">{a.profiles.phone} · WhatsApp</a>:<small className={styles.noContact}>Sem telefone cadastrado</small>}</div></div>
     <div className={styles.serviceBlock}><span>{a.services?.name}</span><small>{a.professionals?.name} · {a.payment_mode === "membership" ? "Incluso no plano" : money(a.services?.price_cents)}</small></div>
     <span className={`${styles.status} ${styles[statusTone[a.status]]}`}>{statusLabel[a.status]}</span>
     <div className={styles.actions}>
@@ -222,7 +225,7 @@ function Clients({ clients, allClients, plans, memberships, search, setSearch, f
     <section className={styles.clientSummary}><div><strong>{allClients.length}</strong><span>clientes cadastrados</span></div><div><strong>{memberships.size}</strong><span>planos ativos</span></div><div><strong>{blockedCount}</strong><span>bloqueados agora</span></div></section>
     <section className={styles.filters}><label className={styles.search}><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome ou telefone"/></label><select value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Todos os clientes</option><option value="members">Com plano</option><option value="without">Sem plano</option><option value="blocked">Bloqueados</option></select></section>
     <section className={styles.clientGrid}>{clients.map((client: Item) => { const membership = memberships.get(client.id); const blocked = client.booking_blocked_until && new Date(client.booking_blocked_until) > new Date(); return <article className={styles.clientCard} key={client.id}>
-      <div className={styles.clientIdentity}><span className={styles.avatar}>{initials(client.full_name)}</span><div><strong>{client.full_name}</strong><a href={whatsapp(client.phone)} target="_blank" rel="noreferrer">{client.phone || "Sem telefone cadastrado"}</a></div>{blocked && <em>Bloqueado</em>}</div>
+      <div className={styles.clientIdentity}><span className={styles.avatar}>{initials(client.full_name)}</span><div><strong>{client.full_name}</strong>{client.phone?<a href={whatsapp(client.phone)} target="_blank" rel="noreferrer">{client.phone}</a>:<small className={styles.noContact}>Sem telefone cadastrado</small>}</div>{blocked && <em>Bloqueado</em>}</div>
       <div className={styles.planControl}><label>Plano atual</label><select disabled={busy === client.id + "plan"} value={membership?.plan_id || ""} onChange={(e) => assignPlan(client.id, e.target.value)}><option value="">Sem plano</option>{plans.filter((p: Item) => p.active).map((plan: Item) => <option key={plan.id} value={plan.id}>{plan.name} · {money(plan.price_cents)}</option>)}</select><small>{membership ? `Benefício ativo: ${membership.plans?.name || "plano mensal"}` : "Atendimentos cobrados na barbearia"}</small></div>
     </article>; })}</section>
     {!clients.length && <Empty title="Cliente não encontrado" text="Revise a busca ou selecione outro filtro."/>}
@@ -232,7 +235,7 @@ function Clients({ clients, allClients, plans, memberships, search, setSearch, f
 function Services({ services, total, search, setSearch, filter, setFilter, busy, saveService }: any) {
   return <><PageHead eyebrow="CATÁLOGO" title="Serviços" text="Ajuste preço, duração e disponibilidade. As mudanças aparecem no agendamento."/>
     <section className={styles.filters}><label className={styles.search}><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar serviço"/></label><select value={filter} onChange={(e) => setFilter(e.target.value)}><option value="active">Ativos</option><option value="inactive">Pausados</option><option value="all">Todos os serviços</option></select><div className={styles.filterNote}>{total} serviços no catálogo</div></section>
-    <section className={styles.serviceGrid}>{services.map((service: Item) => <form key={service.id} className={styles.serviceCard} onSubmit={(event) => saveService(event, service.id)}><div className={styles.serviceCardHead}><span>{service.display_order?.toString().padStart(2, "0") || "NP"}</span><label className={styles.switch}><input name="active" type="checkbox" defaultChecked={service.active}/><i/><b>{service.active ? "Ativo" : "Pausado"}</b></label></div><label>Nome<input name="name" defaultValue={service.name} required/></label><div className={styles.serviceFields}><label>Valor (R$)<input name="price" type="number" min="0" step="0.01" defaultValue={(service.price_cents / 100).toFixed(2)} required/></label><label>Duração<input name="duration" type="number" min="15" step="15" defaultValue={service.duration_minutes} required/><small>min</small></label></div><button disabled={busy === service.id + "service"}>{busy === service.id + "service" ? "Salvando..." : "Salvar alterações"}</button></form>)}</section>
+    <section className={styles.serviceGrid}>{services.map((service: Item) => <form key={service.id} className={styles.serviceCard} onSubmit={(event) => saveService(event, service.id)}><div className={styles.serviceCardHead}><span>{service.display_order?.toString().padStart(2, "0") || "—"}</span><label className={styles.switch}><input name="active" type="checkbox" defaultChecked={service.active}/><i/><b>{service.active ? "Ativo" : "Pausado"}</b></label></div><label>Nome<input name="name" defaultValue={service.name} required/></label><div className={styles.serviceFields}><label>Valor (R$)<input name="price" type="number" min="0" step="0.01" defaultValue={(service.price_cents / 100).toFixed(2)} required/></label><label>Duração<input name="duration" type="number" min="15" step="15" defaultValue={service.duration_minutes} required/><small>min</small></label></div><button disabled={busy === service.id + "service"}>{busy === service.id + "service" ? "Salvando..." : "Salvar alterações"}</button></form>)}</section>
     {!services.length && <Empty title="Serviço não encontrado" text="Revise a busca ou altere o filtro."/>}
   </>;
 }
@@ -243,4 +246,4 @@ function Team({ professionals, appointments, busy, toggleProfessional, openAgend
   </>;
 }
 
-function Empty({ title, text }: { title: string; text: string }) { return <div className={styles.empty}><span>NP</span><strong>{title}</strong><p>{text}</p></div>; }
+function Empty({ title, text }: { title: string; text: string }) { return <div className={styles.empty}><span><Image src="/logo-neemias-prime.png" alt="" width={34} height={34}/></span><strong>{title}</strong><p>{text}</p></div>; }

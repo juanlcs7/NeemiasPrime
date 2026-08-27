@@ -114,7 +114,7 @@ function EntrarForm() {
   return (
     <main className={styles.root} onMouseMove={moveLight} style={{ "--mouse-x": "72%", "--mouse-y": "38%" } as CSSProperties}>
       <section className="auth-scene" aria-label="Experiência Neemias Prime">
-        <Image src="/neemias-hero.webp" alt="Cliente na cadeira da Barbearia Neemias Prime" fill priority sizes="(max-width: 820px) 100vw, 54vw" />
+        <Image src="/neemias-prime-fachada-instagram.jpg" alt="Fachada real da Barbearia Neemias Prime" fill priority sizes="(max-width: 820px) 100vw, 54vw" />
         <div className="auth-scene-shade" />
         <div className="auth-light-follow" aria-hidden="true" />
         <div className="auth-orbit auth-orbit-one" aria-hidden="true" />

@@ -34,3 +34,16 @@
   .mobileNav .bookingButton.mobileActive{border-color:#d8ff8e;background:#b9ff38;color:#0a1109;box-shadow:0 7px 25px #b9ff3838}.mobileNav .bookingButton.mobileActive i{background:transparent;box-shadow:none}
 }
 @media(max-width:380px){.mobileNav{left:5px;right:5px;padding-inline:3px}.mobileNav button span{font-size:5.5px}}
+
+/* Contraste e acabamento da navegação unificada */
+.brand img,.mobileBrand img{filter:grayscale(1) contrast(1.14);box-shadow:0 8px 24px #0007}
+.brand small{color:#849289;font-size:6px}.sideProfile small{color:#819087;font-size:6px}.sideProfile strong{font-size:9px}
+.sidebar nav button>span{font-size:9px}.adminAccess>span{font-size:8px}.adminAccess small{color:#8e9c94;font-size:6px}.logout{font-size:8px}
+.location small{color:#78817c;font-size:7px}.location strong{font-size:10px}.profileButton small{color:#7e8782;font-size:6px}.profileButton strong{font-size:9px}
+.sidebar nav button:focus-visible,.profileButton:focus-visible,.mobileNav button:focus-visible,.topAdmin:focus-visible,.adminAccess:focus-visible{outline:3px solid #9dd22f;outline-offset:3px}
+.topbar{box-shadow:0 10px 35px #14221b09}
+@media(max-width:850px){
+  .mobileBrand span{font-size:8px}.mobileNav button span{font-size:7px;letter-spacing:.02em}
+  .mobileNav{border-color:#b9ff3820;background:linear-gradient(105deg,#07100ef5,#0c1914f2)}
+}
+@media(max-width:380px){.mobileNav button span{font-size:6px}}

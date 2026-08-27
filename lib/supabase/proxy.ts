@@ -2,10 +2,35 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+  // A agenda do cliente agora é uma aba interna. Mantemos o endereço antigo
+  // funcionando sem submetê-lo a uma segunda autenticação de rota.
+  if (request.nextUrl.pathname === "/cliente/agendamentos") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/cliente";
+    url.search = "";
+    url.hash = "meus-agendamentos";
+    return NextResponse.redirect(url);
+  }
+
   let response = NextResponse.next({ request });
+  const protectedRoute = request.nextUrl.pathname.startsWith("/cliente") || request.nextUrl.pathname.startsWith("/admin");
+  const supabaseUrl=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  // A vitrine pública e a tela de entrada continuam disponíveis mesmo durante
+  // uma indisponibilidade de configuração. Rotas privadas permanecem fechadas.
+  if(!supabaseUrl||!supabaseKey){
+    if(protectedRoute){
+      const url=request.nextUrl.clone();
+      url.pathname="/entrar";
+      url.searchParams.set("retorno",request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+    return response;
+  }
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookieOptions: {
         path: "/",
@@ -24,9 +49,14 @@ export async function updateSession(request: NextRequest) {
   );
   // getUser valida e renova a sessão. Isso evita que uma troca de rota use
   // um token antigo e mande o cliente de volta para o login.
-  const { data: { user } } = await supabase.auth.getUser();
+  let user=null;
+  try {
+    const result=await supabase.auth.getUser();
+    user=result.data.user;
+  } catch {
+    user=null;
+  }
   const loggedIn = Boolean(user);
-  const protectedRoute = request.nextUrl.pathname.startsWith("/cliente") || request.nextUrl.pathname.startsWith("/admin");
 
   function redirectWithSession(url: URL) {
     const redirectResponse = NextResponse.redirect(url);

@@ -23,12 +23,19 @@ const plans=[
 ];
 
 export default async function Home() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("role,full_name").eq("id", user.id).maybeSingle()
-    : { data: null };
-  const isAdmin = profile?.role === "admin";
+  let accountPath="/entrar";
+  let isAdmin=false;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if(user){
+      accountPath="/cliente";
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+      isAdmin=profile?.role === "admin";
+    }
+  } catch {
+    // A vitrine pública continua disponível mesmo se o serviço de sessão oscilar.
+  }
 
   return <main className="landing new-landing">
     <LandingEffects />
@@ -38,7 +45,7 @@ export default async function Home() {
       <nav><a href="#experiencia">Experiência</a><a href="#servicos">Serviços</a><a href="#equipe">Equipe</a><a href="#planos">Clube</a></nav>
       <div className="nav-actions">
         {isAdmin && <Link className="nav-admin" href="/admin"><span aria-hidden="true">A</span><b>ADMINISTRAÇÃO</b></Link>}
-        <Link className="nav-login" href={user ? "/cliente" : "/entrar"}>{user ? "Minha conta" : "Entrar"}</Link>
+        <Link className="nav-login" href={accountPath}>{accountPath==="/cliente" ? "Minha conta" : "Entrar"}</Link>
         <Link className="lime-button nav-book" href="/entrar?retorno=/cliente"><span className="nav-book-label">AGENDAR</span><PrimeArrowIcon /></Link>
       </div>
     </header>
@@ -57,7 +64,7 @@ export default async function Home() {
     <section id="experiencia" className="manifesto-section">
       <div className="manifesto-side"><span>02 / MANIFESTO</span><div className="line"/><small>RUA GONÇALVES<br/>GATTO, 296</small></div>
       <div className="manifesto-main"><p className="neo-kicker"><i/> MAIS QUE UM CORTE</p><h2>Não é vaidade.<br/>É a forma como você<br/><em>entra no mundo.</em></h2><div className="manifesto-copy"><p>A Neemias Prime reúne profissionais treinados, serviço preciso e um ambiente feito para você desacelerar — enquanto sua presença ganha outra força.</p><div><span><b>08+</b> anos elevando o padrão</span><span><b>15</b> serviços em um só lugar</span><span><b>04</b> profissionais Prime</span></div></div></div>
-      <div className="manifesto-card manifesto-cut-card"><Image className="manifesto-cut-photo" src="/neemias-prime-corte-real.jpg" alt="Corte masculino realizado pela Barbearia Neemias Prime" fill sizes="(max-width: 1000px) 0px, 30vw"/><div className="manifesto-cut-shade"/><span className="card-number">NP<br/>17</span><p><small>RESULTADO REAL · NEEMIAS PRIME</small>UM CORTE QUE<br/><strong>MUDA A PRESENÇA.</strong></p></div>
+      <div className="manifesto-card manifesto-cut-card"><Image className="manifesto-cut-photo" src="/neemias-prime-corte-real.jpg" alt="Corte masculino realizado pela Barbearia Neemias Prime" fill sizes="(max-width: 1000px) 0px, 30vw"/><div className="manifesto-cut-shade"/><span className="card-brand-mark"><Image src="/logo-neemias-prime.png" width={66} height={66} alt=""/></span><p><small>RESULTADO REAL · NEEMIAS PRIME</small>UM CORTE QUE<br/><strong>MUDA A PRESENÇA.</strong></p></div>
     </section>
 
     <section id="servicos" className="bento-services">
@@ -74,13 +81,13 @@ export default async function Home() {
     <section id="equipe" className="team-showcase"><header><p className="neo-kicker"><i/> QUEM FAZ A PRIME</p><h2>Quatro profissionais.<br/><em>Um único padrão.</em></h2></header><div className="team-type">{professionals.map((p,i)=><article key={p}><span>0{i+1}</span><h3>{p}</h3><i>PRIME PROFESSIONAL</i><Link href="/entrar?retorno=/cliente">AGENDAR <PrimeArrowIcon /></Link></article>)}</div></section>
 
     <section id="planos" className="plans-stage">
-      <div className="plans-intro"><p className="neo-kicker"><i/> CLUBE DE ASSINATURA</p><h2>Seu visual não<br/>espera a próxima<br/><em>ocasião.</em></h2><p>Planos para manter corte e barba sempre em dia. O administrador vincula seu plano e o benefício aparece automaticamente no agendamento.</p><div className="club-stamp"><span>CLUBE</span><strong>NP</strong><small>MEMBRO PRIME</small></div></div>
+      <div className="plans-intro"><p className="neo-kicker"><i/> CLUBE DE ASSINATURA</p><h2>Seu visual não<br/>espera a próxima<br/><em>ocasião.</em></h2><p>Planos para manter corte e barba sempre em dia. O administrador vincula seu plano e o benefício aparece automaticamente no agendamento.</p><div className="club-stamp"><span>CLUBE</span><strong><Image src="/logo-neemias-prime.png" width={58} height={58} alt=""/></strong><small>MEMBRO PRIME</small></div></div>
       <div className="plan-stack">{plans.map((p)=><article className={p.popular?"popular-plan":""} key={p.name}>{p.popular&&<span className="popular-label">MAIS ESCOLHIDO</span>}<header><small>{p.name}</small><b>{p.caption}</b></header><div className="plan-price"><span>R$</span><strong>{p.price}</strong><small>/mês</small></div><p>✓ {p.days}<br/>✓ Agendamento online<br/>✓ Benefício automático</p><Link href="https://wa.me/5521959438832" target="_blank">QUERO ESTE PLANO <PrimeArrowIcon /></Link></article>)}</div>
     </section>
 
     <section className="social-proof"><div><span>5.0</span><div><b>★★★★★</b><p>“Atenção e o capricho<br/>que você merece.”</p></div></div><aside><p>28 AVALIAÇÕES</p><h2>O padrão é percebido.<br/><em>E lembrado.</em></h2><a href="https://www.instagram.com/barbearianeemiasprime/" target="_blank" rel="noreferrer">VER @BARBEARIANEEMIASPRIME <PrimeArrowIcon /></a></aside></section>
 
-    <section className="final-cta"><div className="cta-orbit"/><p className="neo-kicker"><i/> SUA VEZ</p><h2>O próximo nível<br/>do seu estilo está<br/><em>a um horário.</em></h2><Link className="lime-button xlarge" href="/entrar?retorno=/cliente">AGENDAR NA NEEMIAS PRIME <PrimeArrowIcon /></Link><div className="cta-meta"><span>TER–SEX · 9H–20H</span><span>SÁB · 9H–19H</span><span>BELFORD ROXO · RJ</span></div></section>
+    <section className="final-cta"><div className="cta-orbit"/><Image className="cta-real-logo" src="/logo-neemias-prime.png" width={64} height={64} alt=""/><p className="neo-kicker"><i/> SUA VEZ</p><h2>O próximo nível<br/>do seu estilo está<br/><em>a um horário.</em></h2><Link className="lime-button xlarge" href="/entrar?retorno=/cliente">AGENDAR NA NEEMIAS PRIME <PrimeArrowIcon /></Link><div className="cta-meta"><span>TER–SEX · 9H–20H</span><span>SÁB · 9H–19H</span><span>BELFORD ROXO · RJ</span></div></section>
 
     <footer className="neo-footer"><Link href="/" className="prime-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={50} height={50}/><span>NEEMIAS <b>PRIME</b></span></Link><div><a href="#servicos">Serviços</a><a href="#equipe">Equipe</a><a href="#planos">Clube</a><Link href="/entrar">Área do cliente</Link></div><p>Rua Gonçalves Gatto, 296<br/>Centro · Belford Roxo/RJ<br/>(21) 95943-8832</p><small>© 2026 NEEMIAS PRIME<br/>PRESENÇA É TUDO.</small></footer>
   </main>;

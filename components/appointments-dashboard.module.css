@@ -26,3 +26,21 @@
 }
 @media(max-width:430px){.root :global(.appointments-top>div){display:none}.root :global(.appointments-hero h1){font-size:38px}.root :global(.appointment-list article){grid-template-columns:54px 1fr}.root :global(.appointment-title>span){display:none}.root :global(.appointment-meta b){font-size:8px}.root :global(.appointment-state>div){gap:5px}.root :global(.appointment-state button){padding:0 9px}.root :global(.reschedule-modal>h2){font-size:27px}}
 @media(prefers-reduced-motion:reduce){.root *{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+
+/* Acabamento final — agendamentos */
+.root :global(.appointments-main){background:radial-gradient(circle at 100% 0,#dfe8d6 0,transparent 28rem),linear-gradient(180deg,#f7f6f1,#eeefe9)}
+.root :global(.appointments-content){animation:appointmentsReveal .48s cubic-bezier(.2,.75,.2,1) both}
+.root :global(.appointments-hero){border:1px solid #ffffff17;box-shadow:0 34px 80px #07110d32,inset 0 1px #ffffff12}
+.root :global(.appointments-hero>i){width:178px;height:178px;right:13%;top:9%;overflow:hidden;border-radius:26px;opacity:.06;filter:grayscale(1) contrast(1.15);letter-spacing:0}
+.root :global(.appointments-hero>i img){object-fit:cover}
+.root :global(.appointment-list article){background:linear-gradient(120deg,#fff,#f8f8f3);box-shadow:0 16px 45px #23342b0c}
+.root :global(.appointment-list article.featured){border-color:#a8c174;box-shadow:0 22px 55px #55742218}
+.root :global(.appointments-tabs button:focus-visible),.root :global(.appointment-state button:focus-visible),.root :global(.new-appointment:focus-visible),.root :global(.reschedule-modal button:focus-visible){outline:3px solid #86ad2c;outline-offset:3px}
+.root :global(.appointments-feedback){border:1px solid #b8cca9;background:#e5f1dc;color:#244a1c;box-shadow:0 12px 30px #27371f13}
+.root :global(.reschedule-modal){border-color:#b9ff3830;box-shadow:0 40px 110px #000c,inset 0 1px #ffffff14}
+@keyframes appointmentsReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(max-width:900px){
+  .root :global(.appointments-hero>i){width:122px;height:122px;right:-15px;top:24%;border-radius:18px}
+  .root :global(.appointment-list article:hover){transform:none}
+}
+@media(prefers-reduced-motion:reduce){.root :global(.appointments-content){animation:none}}
