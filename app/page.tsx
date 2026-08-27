@@ -47,7 +47,7 @@ export default async function Home() {
       <div className="chrome-orbit orbit-one"/><div className="chrome-orbit orbit-two"/>
       <div className="hero-index"><span>BARBEARIA</span><b>01</b><i/></div>
       <div className="neo-copy"><p className="neo-kicker"><i/> BELFORD ROXO · RJ</p><h1>EXPRESSE<br/><span>SUA MELHOR</span><br/>VERSÃO.</h1><p className="neo-lead">Técnica, presença e cuidado em uma experiência criada para quem não aceita qualquer resultado.</p><div className="neo-actions"><Link className="lime-button large" href="/entrar?retorno=/cliente">ESCOLHER MEU HORÁRIO <PrimeArrowIcon /></Link><a href="#experiencia">Explorar a experiência ↓</a></div></div>
-      <div className="hero-person"><div className="hero-image-wrap"><Image src="/neemias-hero.webp" alt="Experiência premium na Barbearia Neemias Prime" fill sizes="(max-width: 900px) 100vw, 55vw" priority/></div><div className="hero-caption"><span>PRIME EXPERIENCE</span><b>DESDE 2017</b></div></div>
+      <div className="hero-person hero-real-place"><div className="hero-image-wrap"><Image className="hero-real-image" src="/neemias-prime-fachada-instagram.jpg" alt="Fachada real da Barbearia Neemias Prime em Belford Roxo" fill sizes="(max-width: 900px) 100vw, 65vw" priority/></div><div className="hero-caption"><span>FOTO REAL · INSTAGRAM OFICIAL</span><b>NEEMIAS PRIME · BELFORD ROXO</b></div></div>
       <div className="floating-badge"><b>5.0</b><span>★★★★★</span><small>EXCELÊNCIA<br/>COMPROVADA</small></div>
       <div className="scroll-cue"><i/> ROLE PARA DESCOBRIR</div>
     </section>
