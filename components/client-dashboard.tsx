@@ -44,7 +44,7 @@ function daysUntilRenewal(value:string){
 
 function barberPhotoPath(name:string) {
   const slug=name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
-  return `/barbeiros/${slug}.webp`;
+  return `/barbeiros/${slug}.png`;
 }
 
 function ProfessionalPortrait({name,index}:{name:string;index:number}) {

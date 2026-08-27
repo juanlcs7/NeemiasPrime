@@ -85,3 +85,21 @@
 
 /* Ícone Prime — evita que setas de ação sejam convertidas em emoji no iOS */
 .prime-arrow-icon{width:18px;height:18px;display:inline-block;flex:0 0 auto;overflow:visible;vertical-align:middle;color:currentColor;transition:transform .25s ease,filter .25s ease}.lime-button .prime-arrow-icon{width:20px;height:20px}.service-bento footer a,.team-type a,.social-proof aside a,.plan-stack article>a{display:flex;align-items:center;gap:7px}.service-all>.prime-arrow-icon{justify-self:end;width:22px;height:22px}.auth-place .prime-arrow-icon{width:17px;height:17px}.portal-side .prime-arrow-icon{width:15px;height:15px}.lime-button:hover .prime-arrow-icon,.service-bento a:hover .prime-arrow-icon,.team-type a:hover .prime-arrow-icon,.plan-stack a:hover .prime-arrow-icon,.social-proof a:hover .prime-arrow-icon{transform:translate(2px,-2px);filter:drop-shadow(0 0 7px currentColor)}
+
+/* Retratos reais da equipe */
+.team-type{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.team-type article{min-height:475px;position:relative;display:flex;align-items:flex-start;flex-direction:column;padding:0 0 22px;overflow:hidden;border:1px solid #ffffff20;background:linear-gradient(155deg,#102019,#080e0c);box-shadow:0 22px 55px #0003}
+.team-type article:last-child{border-bottom:1px solid #ffffff20}
+.team-type article:hover{padding-left:0;border-color:#b9ff385c;background:linear-gradient(155deg,#14271f,#080e0c);transform:translateY(-7px);box-shadow:0 30px 75px #0006}
+.team-photo{position:relative;width:100%;height:330px;overflow:hidden;background:#15211c}
+.team-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 58%,#08100dc7 100%),linear-gradient(120deg,#b9ff3809,transparent 44%);pointer-events:none}
+.team-photo img{object-fit:cover;object-position:center 20%;filter:saturate(.82) contrast(1.06);transition:transform .65s cubic-bezier(.2,.75,.2,1),filter .45s}
+.team-type article:nth-child(4) .team-photo img{object-position:center 18%}
+.team-type article:hover .team-photo img{transform:scale(1.045);filter:saturate(.98) contrast(1.04)}
+.team-type article>span{position:absolute;z-index:2;top:16px;left:16px;width:34px;height:34px;display:grid;place-items:center;border:1px solid #dfff9d66;border-radius:50%;background:#07100fc9;color:var(--lime);font-size:7px;backdrop-filter:blur(8px)}
+.team-type h3{margin:19px 18px 7px;font-size:clamp(25px,2.5vw,39px);line-height:.96}
+.team-type i{margin:0 18px;color:#9da8a2;font-size:6px;letter-spacing:1.5px}
+.team-type a{margin:auto 18px 0;padding-top:18px;color:var(--lime);font-size:7px;font-weight:900;letter-spacing:.8px}
+@media(max-width:1000px){.team-type{grid-template-columns:repeat(2,minmax(0,1fr))}.team-type article{min-height:460px}.team-photo{height:330px}}
+@media(max-width:700px){.team-type{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.team-type article{min-height:350px;padding-bottom:17px}.team-type article:hover{padding-left:0;transform:none}.team-photo{height:238px}.team-type h3{margin:14px 13px 6px;font-size:23px}.team-type i{display:block;margin:0 13px;font-size:5px}.team-type a{margin:14px 13px 0;padding-top:0}.team-type article>span{top:10px;left:10px;width:30px;height:30px}}
+@media(max-width:460px){.team-type{grid-template-columns:1fr}.team-type article{min-height:455px}.team-photo{height:345px}.team-type h3{font-size:29px}}

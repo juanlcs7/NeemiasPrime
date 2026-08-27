@@ -17,6 +17,12 @@ const initials = (name = "Cliente") => name.split(" ").filter(Boolean).slice(0, 
 const whatsapp = (phone = "") => { const digits=phone.replace(/\D/g, ""); return `https://wa.me/${digits.startsWith("55")?digits:`55${digits}`}`; };
 const statusLabel: Record<string, string> = { scheduled: "Agendado", confirmed: "Confirmado", completed: "Concluído", cancelled: "Cancelado", no_show: "Não compareceu" };
 const statusTone: Record<string, string> = { scheduled: "blue", confirmed: "green", completed: "neutral", cancelled: "red", no_show: "orange" };
+const professionalPhotos: Record<string, string> = {
+  "Breno Sousa": "/barbeiros/breno-sousa.png",
+  "Agatha Sousa": "/barbeiros/agatha-sousa.png",
+  "Matheus Francisco": "/barbeiros/matheus-francisco.png",
+  "Neemias Prime": "/barbeiros/neemias-prime.png",
+};
 
 const nav: { id: Tab; label: string; short: string }[] = [
   { id: "overview", label: "Visão geral", short: "VG" },
@@ -242,7 +248,7 @@ function Services({ services, total, search, setSearch, filter, setFilter, busy,
 
 function Team({ professionals, appointments, busy, toggleProfessional, openAgenda }: any) {
   return <><PageHead eyebrow="OPERAÇÃO" title="Equipe" text="Controle quem aparece na agenda e acompanhe a carga de cada profissional."/>
-    <section className={styles.teamGrid}>{professionals.map((pro: Item, index: number) => { const upcoming = appointments.filter((a: Item) => a.professionals?.id === pro.id && ["scheduled", "confirmed"].includes(a.status)).length; return <article className={styles.teamCard} key={pro.id}><div className={styles.proPortrait}><span>{initials(pro.name)}</span><em>0{index + 1}</em></div><div><span className={pro.active ? styles.available : styles.paused}>{pro.active ? "Disponível" : "Pausado"}</span><h2>{pro.name}</h2><p>{upcoming} atendimento{upcoming === 1 ? "" : "s"} nos próximos 30 dias</p></div><div className={styles.teamActions}><button onClick={() => openAgenda("all")}>Ver agenda</button><button disabled={busy === pro.id + "pro"} className={pro.active ? styles.pauseButton : styles.enableButton} onClick={() => toggleProfessional(pro.id, !pro.active)}>{pro.active ? "Pausar agenda" : "Ativar agenda"}</button></div></article>; })}</section>
+    <section className={styles.teamGrid}>{professionals.map((pro: Item, index: number) => { const upcoming = appointments.filter((a: Item) => a.professionals?.id === pro.id && ["scheduled", "confirmed"].includes(a.status)).length; const photo=professionalPhotos[pro.name]; return <article className={styles.teamCard} key={pro.id}><div className={styles.proPortrait}>{photo?<Image src={photo} alt={`Foto de ${pro.name}`} fill sizes="(max-width: 560px) 74px, 90px"/>:<span>{initials(pro.name)}</span>}<em>0{index + 1}</em></div><div><span className={pro.active ? styles.available : styles.paused}>{pro.active ? "Disponível" : "Pausado"}</span><h2>{pro.name}</h2><p>{upcoming} atendimento{upcoming === 1 ? "" : "s"} nos próximos 30 dias</p></div><div className={styles.teamActions}><button onClick={() => openAgenda("all")}>Ver agenda</button><button disabled={busy === pro.id + "pro"} className={pro.active ? styles.pauseButton : styles.enableButton} onClick={() => toggleProfessional(pro.id, !pro.active)}>{pro.active ? "Pausar agenda" : "Ativar agenda"}</button></div></article>; })}</section>
   </>;
 }
 

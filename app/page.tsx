@@ -14,7 +14,12 @@ const serviceCards = [
   { n:"05",name:"Corte Infantil",price:"R$ 45",note:"Dos 7 aos 11 anos",mark:"K" },
   { n:"06",name:"Todos os serviços",price:"15 opções",note:"Do acabamento à coloração",mark:"+" },
 ];
-const professionals=["Breno Sousa","Agatha Sousa","Matheus Francisco","Neemias Prime"];
+const professionals=[
+  {name:"Breno Sousa",image:"/barbeiros/breno-sousa.png"},
+  {name:"Agatha Sousa",image:"/barbeiros/agatha-sousa.png"},
+  {name:"Matheus Francisco",image:"/barbeiros/matheus-francisco.png"},
+  {name:"Neemias Prime",image:"/barbeiros/neemias-prime.png"},
+];
 const plans=[
   {name:"Prime 2x",price:"79,90",caption:"Corte ilimitado",days:"Terça e quinta"},
   {name:"Prime Week",price:"99,90",caption:"Corte ilimitado",days:"Terça a sábado",popular:true},
@@ -78,7 +83,7 @@ export default async function Home() {
       <div className="booking-story-copy"><span>03 / SEM COMPLICAÇÃO</span><h2>Da vontade<br/>à cadeira em<br/><em>três movimentos.</em></h2><ol><li><b>01</b><span><strong>Escolha o serviço</strong><small>Preço e duração claros, sem surpresa.</small></span></li><li><b>02</b><span><strong>Encontre seu profissional</strong><small>Veja apenas horários realmente livres.</small></span></li><li><b>03</b><span><strong>Confirme. Está marcado.</strong><small>Seu horário fica reservado na hora.</small></span></li></ol><Link className="lime-button large" href="/entrar?retorno=/cliente">AGENDAR AGORA <PrimeArrowIcon /></Link></div>
     </section>
 
-    <section id="equipe" className="team-showcase"><header><p className="neo-kicker"><i/> QUEM FAZ A PRIME</p><h2>Quatro profissionais.<br/><em>Um único padrão.</em></h2></header><div className="team-type">{professionals.map((p,i)=><article key={p}><span>0{i+1}</span><h3>{p}</h3><i>PRIME PROFESSIONAL</i><Link href="/entrar?retorno=/cliente">AGENDAR <PrimeArrowIcon /></Link></article>)}</div></section>
+    <section id="equipe" className="team-showcase"><header><p className="neo-kicker"><i/> QUEM FAZ A PRIME</p><h2>Quatro profissionais.<br/><em>Um único padrão.</em></h2></header><div className="team-type">{professionals.map((professional,index)=><article key={professional.name}><div className="team-photo"><Image src={professional.image} alt={`Foto de ${professional.name}`} fill sizes="(max-width: 460px) 100vw, (max-width: 1000px) 50vw, 25vw"/></div><span>0{index+1}</span><h3>{professional.name}</h3><i>PRIME PROFESSIONAL</i><Link href="/entrar?retorno=/cliente">AGENDAR <PrimeArrowIcon /></Link></article>)}</div></section>
 
     <section id="planos" className="plans-stage">
       <div className="plans-intro"><p className="neo-kicker"><i/> CLUBE DE ASSINATURA</p><h2>Seu visual não<br/>espera a próxima<br/><em>ocasião.</em></h2><p>Planos para manter corte e barba sempre em dia. O administrador vincula seu plano e o benefício aparece automaticamente no agendamento.</p><div className="club-stamp"><span>CLUBE</span><strong><Image src="/logo-neemias-prime.png" width={58} height={58} alt=""/></strong><small>MEMBRO PRIME</small></div></div>
