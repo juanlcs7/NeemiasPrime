@@ -42,5 +42,14 @@
 .hero-real-place .hero-caption{z-index:2;padding:10px 12px;border-left:2px solid var(--lime);background:#06100eb8;backdrop-filter:blur(8px)}
 @media(max-width:700px){.hero-real-place{top:205px;bottom:0}.hero-real-place:after{background:linear-gradient(180deg,#07100f 0%,transparent 22%,transparent 66%,#07100f 100%)}.hero-real-image{object-position:center 50%!important;filter:saturate(.88) contrast(1.06) brightness(.78)}.hero-real-place .hero-caption{display:flex;right:18px;bottom:18px;font-size:6px}}
 
+/* Resultado real no manifesto */
+.manifesto-cut-card{isolation:isolate;border:1px solid #1c2a25;background:#07100f;box-shadow:0 30px 70px #0b16122b}
+.manifesto-cut-photo{z-index:0;object-fit:cover;object-position:center 28%;filter:saturate(.72) contrast(1.12) brightness(.8);transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s}
+.manifesto-cut-shade{position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(180deg,#07100f1c 20%,#07100f00 43%,#07100ff2 100%),linear-gradient(90deg,#07100f5c,transparent 45%)}
+.manifesto-cut-card .card-number{z-index:2;color:#ffffff10;text-shadow:0 0 40px #07100f}
+.manifesto-cut-card p{z-index:2;margin:0;font-size:11px}
+.manifesto-cut-card p small{display:block;margin-bottom:10px;color:#d4dad6;font-size:6px;font-weight:900;letter-spacing:1.6px}
+.manifesto-cut-card:hover .manifesto-cut-photo{transform:scale(1.035);filter:saturate(.85) contrast(1.1) brightness(.86)}
+
 /* Ícone Prime — evita que setas de ação sejam convertidas em emoji no iOS */
 .prime-arrow-icon{width:18px;height:18px;display:inline-block;flex:0 0 auto;overflow:visible;vertical-align:middle;color:currentColor;transition:transform .25s ease,filter .25s ease}.lime-button .prime-arrow-icon{width:20px;height:20px}.service-bento footer a,.team-type a,.social-proof aside a,.plan-stack article>a{display:flex;align-items:center;gap:7px}.service-all>.prime-arrow-icon{justify-self:end;width:22px;height:22px}.auth-place .prime-arrow-icon{width:17px;height:17px}.portal-side .prime-arrow-icon{width:15px;height:15px}.lime-button:hover .prime-arrow-icon,.service-bento a:hover .prime-arrow-icon,.team-type a:hover .prime-arrow-icon,.plan-stack a:hover .prime-arrow-icon,.social-proof a:hover .prime-arrow-icon{transform:translate(2px,-2px);filter:drop-shadow(0 0 7px currentColor)}

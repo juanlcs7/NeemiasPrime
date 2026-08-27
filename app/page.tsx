@@ -57,7 +57,7 @@ export default async function Home() {
     <section id="experiencia" className="manifesto-section">
       <div className="manifesto-side"><span>02 / MANIFESTO</span><div className="line"/><small>RUA GONÇALVES<br/>GATTO, 296</small></div>
       <div className="manifesto-main"><p className="neo-kicker"><i/> MAIS QUE UM CORTE</p><h2>Não é vaidade.<br/>É a forma como você<br/><em>entra no mundo.</em></h2><div className="manifesto-copy"><p>A Neemias Prime reúne profissionais treinados, serviço preciso e um ambiente feito para você desacelerar — enquanto sua presença ganha outra força.</p><div><span><b>08+</b> anos elevando o padrão</span><span><b>15</b> serviços em um só lugar</span><span><b>04</b> profissionais Prime</span></div></div></div>
-      <div className="manifesto-card"><span className="card-number">NP<br/>17</span><div className="chair-drawing"><i/><b/><em/></div><p>UM AMBIENTE DE<br/><strong>CAVALHEIROS</strong><br/>PARA CAVALHEIROS.</p></div>
+      <div className="manifesto-card manifesto-cut-card"><Image className="manifesto-cut-photo" src="/neemias-prime-corte-real.jpg" alt="Corte masculino realizado pela Barbearia Neemias Prime" fill sizes="(max-width: 1000px) 0px, 30vw"/><div className="manifesto-cut-shade"/><span className="card-number">NP<br/>17</span><p><small>RESULTADO REAL · NEEMIAS PRIME</small>UM CORTE QUE<br/><strong>MUDA A PRESENÇA.</strong></p></div>
     </section>
 
     <section id="servicos" className="bento-services">
