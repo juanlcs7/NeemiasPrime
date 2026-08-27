@@ -322,8 +322,9 @@
 .root :global(.next-watermark img){object-fit:cover}
 .root :global(.choose-time-link){margin-top:25px;padding:0;border:0;background:none;color:var(--lime);font-size:8px;font-weight:900;letter-spacing:1px;cursor:pointer;transition:color .2s,transform .2s}
 .root :global(.choose-time-link:hover){color:#d4ff7c;transform:translateX(4px)}
-.root :global(.booking-builder),.root :global(.history-table),.root :global(.profile-form){border:1px solid #dde0d8;box-shadow:0 24px 70px #1b292210}
-.root :global(.booking-step.stage-active){background:linear-gradient(110deg,#fff 0%,#fbfcf8 65%,#b9ff3807 100%)}
+.root :global(.booking-builder){border:1px solid #b9ff3826;box-shadow:0 30px 78px #07110d45,inset 0 1px #ffffff0b}
+.root :global(.history-table),.root :global(.profile-form){border:1px solid #dde0d8;box-shadow:0 24px 70px #1b292210}
+.root :global(.booking-step.stage-active){background:radial-gradient(circle at 92% 8%,#1d473a55 0,transparent 30rem),linear-gradient(120deg,#080d0c,#0d1713 62%,#0a110e)}
 .root :global(.service-catalog button),.root :global(.professional-picker button),.root :global(.seven-days button),.root :global(.slot-groups button){box-shadow:0 8px 22px #1d29230a}
 .root :global(.service-catalog button:focus-visible),.root :global(.professional-picker button:focus-visible),.root :global(.seven-days button:focus-visible),.root :global(.slot-groups button:focus-visible),.root :global(.booking-progress button:focus-visible){outline:3px solid #91bd2e;outline-offset:3px}
 .root :global(.booking-empty-choice){grid-column:1/-1;min-height:118px;padding:24px;display:flex;align-items:center;gap:16px;border:1px dashed #b8c1b4;border-radius:12px;background:#f4f6f0;color:#344138}
@@ -350,6 +351,64 @@
   .root :global(.plans-hero>strong>img){width:48px;height:48px;border-radius:8px}
   .root :global(.client-plan-grid article:hover){transform:none}
   .root :global(.booking-empty-choice){min-height:104px;padding:18px}
+}
+
+/* Agendamento sem a superfície branca da versão anterior */
+.root :global(.booking-builder:before){content:"";width:390px;height:390px;right:-90px;top:245px;color:transparent;font-size:0;letter-spacing:0;writing-mode:horizontal-tb;background:url("/logo-neemias-prime.png") center/contain no-repeat;opacity:.035;filter:grayscale(1);transform:rotate(8deg)}
+.root :global(.booking-builder:after){opacity:.09;background-image:linear-gradient(115deg,transparent 0 52%,#b9ff3808 52.2%,transparent 52.5%),repeating-linear-gradient(115deg,transparent 0 21px,#ffffff05 21px 22px)}
+.root :global(.booking-head){background:radial-gradient(circle at 82% 12%,#286350 0,transparent 34%),linear-gradient(125deg,#07100d,#0c1814 58%,#111f1a)}
+.root :global(.booking-progress){background:#07100df5;box-shadow:0 12px 35px #0004}
+.root :global(.booking-step){color:#f2f5f1;border-bottom-color:#ffffff10;background:linear-gradient(120deg,#080d0c,#0d1713)}
+.root :global(.booking-step>header h3){color:#f4f6f1;text-shadow:0 1px 18px #000}
+.root :global(.booking-step>header p){color:#8b9891}
+.root :global(.service-detail){border-color:#b9ff3818;background:linear-gradient(100deg,#060b09,#0b1411);box-shadow:inset 3px 0 #b9ff38;color:#eef2ed}
+.root :global(.service-detail em){color:#8c9992}
+.root :global(.booking-empty-choice){border-color:#ffffff18;background:#0d1612;color:#9ca8a2}
+.root :global(.booking-empty-choice strong){color:#f2f5f0}
+.root :global(.booking-empty-choice span){color:#7e8b84}
+
+/* Clube premium — um único plano e renovação em destaque */
+.root :global(.plans-hero){border-color:#b9ff3826;background:radial-gradient(circle at 76% 25%,#276453 0,transparent 30%),radial-gradient(circle at 15% 100%,#21392f 0,transparent 35%),linear-gradient(135deg,#050b09,#0c1713 58%,#07100d);box-shadow:0 38px 95px #0008,inset 0 1px #ffffff10}
+.root :global(.client-plan-grid article){overflow:hidden;border-color:#ffffff16;background:radial-gradient(circle at 100% 0,#233c32 0,transparent 42%),linear-gradient(145deg,#111b17,#080e0c);box-shadow:0 28px 70px #0005}
+.root :global(.client-plan-grid article:before){content:"";height:1px;position:absolute;left:20px;right:20px;top:0;background:linear-gradient(90deg,transparent,#b9ff387a,transparent)}
+.root :global(.client-plan-grid article.featured-plan){border-color:#b9ff3891;background:radial-gradient(circle at 100% 0,#315544 0,transparent 44%),linear-gradient(145deg,#17261f,#0a110e);box-shadow:0 32px 80px #0008,0 0 45px #b9ff380c}
+.root :global(.premium-active-plan){position:relative;isolation:isolate;grid-template-columns:minmax(0,1.28fr) minmax(350px,.72fr);border-color:#b9ff3866;border-radius:24px;background:#07100d;box-shadow:0 38px 100px #0009,0 0 55px #b9ff380a,inset 0 1px #ffffff12}
+.root :global(.premium-active-plan:before){content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 8% 0,#2f6954 0,transparent 34%),linear-gradient(120deg,transparent 44%,#b9ff3808 44.2%,transparent 44.5%)}
+.root :global(.premium-active-plan .active-plan-main){padding:52px 56px}
+.root :global(.active-plan-top){display:flex;align-items:center;justify-content:space-between}
+.root :global(.active-plan-top img){border-radius:12px;filter:grayscale(1) contrast(1.14);box-shadow:0 15px 38px #0008}
+.root :global(.premium-active-plan .active-badge){border:1px solid #b9ff3832;background:#b9ff380d;box-shadow:0 0 28px #b9ff380b}
+.root :global(.premium-active-plan .active-plan-main>p){margin-top:50px;color:#8b9891}
+.root :global(.premium-active-plan .active-plan-main h2){font-size:52px;letter-spacing:-2px}
+.root :global(.premium-active-plan .active-plan-price){margin:29px 0 36px}
+.root :global(.premium-active-plan .active-plan-price strong){font-size:48px}
+.root :global(.premium-active-plan .active-plan-main ul){gap:18px 30px;color:#aab5af;font-size:9px}
+.root :global(.premium-active-plan .active-plan-main li i){margin-right:9px;color:var(--lime);font-style:normal}
+.root :global(.premium-active-plan .renewal-panel){padding:42px;gap:13px;border-left-color:#b9ff381c;background:linear-gradient(160deg,#08110e,#040806)}
+.root :global(.renewal-countdown){min-height:245px!important;padding:27px!important;justify-content:center;border-color:#b9ff3842!important;background:radial-gradient(circle at 80% 0,#234c3d,#0c1713 55%,#080d0b)!important;box-shadow:inset 0 1px #ffffff10,0 22px 55px #0005}
+.root :global(.renewal-countdown>small){color:var(--lime)!important}
+.root :global(.renewal-countdown>div){display:flex;align-items:flex-end;gap:13px}
+.root :global(.renewal-countdown>div>strong){color:#f5f7f2!important;font:400 82px/.82 Georgia,serif!important;letter-spacing:-5px}
+.root :global(.renewal-countdown>div>span){padding-bottom:8px;color:#aab5af;font-size:12px;font-weight:800;text-transform:uppercase}
+.root :global(.renewal-countdown>div>span b){display:block;margin-top:5px;color:var(--lime);font-size:6px;letter-spacing:1.2px}
+.root :global(.renewal-countdown>p){margin:5px 0 0;color:#7f8c85;font-size:8px;line-height:1.6}
+.root :global(.premium-active-plan .due-date){border-color:#ffffff12;background:#0b1411}
+.root :global(.premium-active-plan .due-date strong){font-size:20px}
+.root :global(.premium-active-plan .cycle-start){background:#090f0d}
+.root :global(.premium-active-plan .cycle-start strong){font-size:15px;color:#aab4ae}
+.root :global(.premium-active-plan .renewal-panel>a){box-shadow:0 14px 38px #8dbd3021;transition:transform .2s,box-shadow .2s}
+.root :global(.premium-active-plan .renewal-panel>a:hover){transform:translateY(-2px);box-shadow:0 18px 45px #98d02f35}
+
+@media(max-width:850px){
+  .root :global(.booking-builder:before){width:230px;height:230px;right:-80px;top:230px}
+  .root :global(.premium-active-plan){grid-template-columns:1fr;border-radius:18px}
+  .root :global(.premium-active-plan .active-plan-main){padding:34px 25px}
+  .root :global(.premium-active-plan .active-plan-main>p){margin-top:35px}
+  .root :global(.premium-active-plan .active-plan-main h2){font-size:38px;letter-spacing:-1px}
+  .root :global(.premium-active-plan .active-plan-price strong){font-size:41px}
+  .root :global(.premium-active-plan .renewal-panel){padding:22px;border-left:0;border-top:1px solid #b9ff381c}
+  .root :global(.renewal-countdown){min-height:210px!important}
+  .root :global(.renewal-countdown>div>strong){font-size:70px!important}
 }
 
 @media(prefers-reduced-motion:reduce){.root :global(.portal-content),.root :global(.plans-page),.root :global(.profile-page),.root :global(.appointments-content){animation:none}.root :global(*){scroll-behavior:auto!important;transition-duration:.01ms!important}}
