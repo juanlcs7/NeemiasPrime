@@ -26,7 +26,7 @@ const nav: { id: Tab; label: string; short: string }[] = [
   { id: "equipe", label: "Equipe", short: "EQ" },
 ];
 
-export default function AdminDashboard({ adminName, adminAccessToken, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
+export default function AdminDashboard({ adminName, adminActionToken, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
   const [tab, setTab] = useState<Tab>("overview");
   const [appointments, setAppointments] = useState<Item[]>(initialAppointments);
   const [services, setServices] = useState<Item[]>(initialServices);
@@ -81,8 +81,8 @@ export default function AdminDashboard({ adminName, adminAccessToken, appointmen
   function notify(message: string) { setFeedback(message); window.setTimeout(() => setFeedback(""), 4000); }
 
   async function adminAction(payload:Record<string,unknown>){
-    if(!adminAccessToken)throw new Error("Sessão administrativa indisponível. Entre novamente.");
-    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${adminAccessToken}`},body:JSON.stringify(payload)});
+    if(!adminActionToken)throw new Error("Autorização administrativa indisponível. Atualize a página.");
+    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Admin ${adminActionToken}`},body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
     if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");
     return result;

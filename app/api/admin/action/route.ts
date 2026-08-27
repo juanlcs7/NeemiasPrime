@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getAdminSupabaseKey, verifyAdminActionToken } from "@/lib/admin-token";
 
 type AdminAction =
   | { action:"appointment_status"; appointmentId:string; status:string }
@@ -13,16 +14,14 @@ function failure(message:string,status=400){return NextResponse.json({error:mess
 
 export async function POST(request:Request){
   const authorization=request.headers.get("authorization");
-  const token=authorization?.startsWith("Bearer ")?authorization.slice(7):null;
-  if(!token)return failure("Token de sessão não enviado.",401);
+  const token=authorization?.startsWith("Admin ")?authorization.slice(6):null;
+  const verified=token?verifyAdminActionToken(token):null;
+  if(!verified)return failure("Autorização administrativa inválida ou expirada.",401);
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if(!url||!key)return failure("Supabase não configurado no servidor.",500);
-  const supabase=createSupabaseClient(url,key,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-  const {data:{user},error:userError}=await supabase.auth.getUser(token);
-  if(userError||!user)return failure("Sua sessão não pôde ser validada. Entre novamente.",401);
-
-  const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).single();
+  if(!url)return failure("Supabase não configurado no servidor.",500);
+  let key:string;try{key=getAdminSupabaseKey();}catch{return failure("Chave administrativa não configurada na Vercel.",500);}
+  const supabase=createSupabaseClient(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const {data:profile}=await supabase.from("profiles").select("role").eq("id",verified.userId).single();
   if(profile?.role!=="admin")return failure("Acesso permitido somente para administradores.",403);
 
   let body:AdminAction;
