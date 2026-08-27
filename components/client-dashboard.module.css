@@ -193,3 +193,110 @@
   .root :global(.booking-builder .service-catalog button){min-height:70px;padding:11px 12px;grid-template-columns:42px 1fr auto 18px}
   .root :global(.professional-picker button>.professional-photo){height:260px}
 }
+
+/* Clube do cliente */
+.root :global(.membership-card button){min-height:43px;padding:0 17px;border:0;border-radius:6px;background:var(--lime);color:#10160e;font-size:8px;font-weight:900;letter-spacing:.5px;cursor:pointer;box-shadow:0 0 28px #b9ff381c}
+.root:global(.plans-shell){min-height:100svh;padding:42px 0 75px;background:radial-gradient(circle at 82% 0,#183f35 0,transparent 29%),#080d0c;color:#f2f5f0}
+.root :global(.plans-page){width:min(1180px,91%);margin:auto}
+.root :global(.plans-back){margin-bottom:28px;padding:0;border:0;background:transparent;color:#7d8a84;font-size:8px;font-weight:900;letter-spacing:1px;cursor:pointer}
+.root :global(.plans-hero){min-height:330px;position:relative;padding:52px 55px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;border:1px solid #ffffff14;border-radius:20px;background:radial-gradient(circle at 78% 30%,#1b5a4b,#0b1512 48%,#070b0a);box-shadow:0 32px 80px #0006;isolation:isolate}
+.root :global(.plans-hero:before){content:"";position:absolute;z-index:-1;inset:0;opacity:.08;background-image:repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 3px)}
+.root :global(.plans-hero:after){content:"";width:480px;height:480px;position:absolute;z-index:-1;right:-120px;top:-250px;border:1px solid #b9ff3847;border-radius:50%;box-shadow:0 0 0 55px #b9ff3803,0 0 85px #b9ff380c}
+.root :global(.plans-hero p){margin:0 0 14px;color:var(--lime);font-size:7px;font-weight:900;letter-spacing:2px}
+.root :global(.plans-hero h1){margin:0;font:400 55px/.91 Georgia,serif;letter-spacing:-2.4px}
+.root :global(.plans-hero h1 em){color:var(--lime);font-style:normal}
+.root :global(.plans-hero>div>span){display:block;max-width:520px;margin-top:20px;color:#9ca8a3;font-size:10px;line-height:1.7}
+.root :global(.plans-hero>strong){width:130px;height:130px;display:flex;align-items:center;justify-content:center;flex-direction:column;border:1px solid #b9ff3857;border-radius:50%;color:var(--lime);font:400 40px Georgia,serif;box-shadow:inset 0 0 35px #b9ff3807,0 0 45px #0004;transform:rotate(6deg)}
+.root :global(.plans-hero>strong small){margin-top:6px;color:#8e9a94;font:900 5px Arial,sans-serif;letter-spacing:1.4px}
+.root :global(.plans-heading){margin:55px 0 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px}
+.root :global(.plans-heading small){color:var(--lime);font-size:7px;font-weight:900;letter-spacing:1.7px}
+.root :global(.plans-heading h2){margin:7px 0 0;font:400 36px Georgia,serif}
+.root :global(.plans-heading p){max-width:420px;margin:0;color:#77837d;font-size:9px;line-height:1.7}
+.root :global(.client-plan-grid){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.root :global(.client-plan-grid article){min-height:430px;position:relative;padding:27px 24px 23px;display:flex;flex-direction:column;border:1px solid #ffffff13;border-radius:14px;background:linear-gradient(145deg,#111a17,#0b1210);box-shadow:0 20px 45px #0003;transition:.25s}
+.root :global(.client-plan-grid article:hover){transform:translateY(-6px);border-color:#b9ff3858}
+.root :global(.client-plan-grid article.featured-plan){border-color:#b9ff3873;background:linear-gradient(145deg,#1a2a23,#0e1713);box-shadow:0 22px 55px #0005,0 0 35px #b9ff3808}
+.root :global(.plan-popular){position:absolute;right:13px;top:13px;padding:6px 8px;border-radius:20px;background:var(--lime);color:#0b1109;font-size:5px;font-weight:900;letter-spacing:.7px}
+.root :global(.client-plan-grid header small){color:#6f7b75;font-size:6px;font-weight:900;letter-spacing:1.5px}
+.root :global(.client-plan-grid h3){min-height:58px;margin:13px 0 0;font:400 21px/1.08 Georgia,serif}
+.root :global(.client-plan-price){margin:30px 0 25px;display:flex;align-items:flex-start;color:var(--lime)}
+.root :global(.client-plan-price>span){margin:7px 5px 0 0;font-size:8px}
+.root :global(.client-plan-price strong){font:400 37px/.9 Georgia,serif;letter-spacing:-1px}
+.root :global(.client-plan-price small){align-self:flex-end;margin-left:4px;color:#65716b;font-size:7px}
+.root :global(.client-plan-grid ul){margin:0;padding:20px 0 0;display:flex;flex-direction:column;gap:14px;border-top:1px solid #ffffff10;list-style:none;color:#99a49f;font-size:8px}
+.root :global(.client-plan-grid li i){margin-right:8px;color:var(--lime);font-style:normal}
+.root :global(.client-plan-grid article>a){height:46px;margin-top:auto;padding:0 13px;display:flex;align-items:center;justify-content:space-between;border:1px solid #ffffff1c;border-radius:7px;background:#ffffff06;color:#dfe5e1;font-size:7px;font-weight:900;transition:.2s}
+.root :global(.client-plan-grid article>a:hover){border-color:var(--lime);background:var(--lime);color:#0a1109}
+.root :global(.client-plan-grid article>a b){font-size:15px}
+.root :global(.active-membership){margin-top:24px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);overflow:hidden;border:1px solid #b9ff383d;border-radius:18px;background:linear-gradient(120deg,#101a16,#0a100e);box-shadow:0 28px 65px #0004}
+.root :global(.active-plan-main){padding:43px 46px}
+.root :global(.active-badge){display:inline-block;padding:7px 10px;border-radius:30px;background:#b9ff3812;color:var(--lime);font-size:6px;font-weight:900;letter-spacing:1.2px}
+.root :global(.active-plan-main>p){margin:32px 0 8px;color:#727f79;font-size:7px;font-weight:900;letter-spacing:1.5px}
+.root :global(.active-plan-main h2){max-width:620px;margin:0;font:400 38px/1.02 Georgia,serif}
+.root :global(.active-plan-price){margin:28px 0 30px;display:flex;align-items:flex-end;gap:6px;color:var(--lime)}
+.root :global(.active-plan-price strong){font:400 39px Georgia,serif}
+.root :global(.active-plan-price small){padding-bottom:7px;color:#7b8781;font-size:8px}
+.root :global(.active-plan-main ul){margin:0;padding:22px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:15px 25px;border-top:1px solid #ffffff10;list-style:none;color:#9aa59f;font-size:8px}
+.root :global(.active-membership aside){padding:38px;display:flex;flex-direction:column;gap:11px;border-left:1px solid #ffffff10;background:#070c0b}
+.root :global(.active-membership aside>div){padding:18px;border:1px solid #ffffff10;border-radius:10px;background:#0d1512;display:flex;flex-direction:column;gap:7px}
+.root :global(.active-membership aside small){color:#68756f;font-size:6px;font-weight:900;letter-spacing:1.2px}
+.root :global(.active-membership aside strong){font:400 19px Georgia,serif;text-transform:capitalize}
+.root :global(.active-membership .due-date){border-color:#b9ff3832;background:#b9ff3808}
+.root :global(.active-membership .due-date strong){color:var(--lime);font-size:24px}
+.root :global(.active-membership .due-date span){color:#718078;font-size:7px;line-height:1.6}
+.root :global(.active-membership aside>a){height:48px;margin-top:auto;padding:0 15px;display:flex;align-items:center;justify-content:space-between;border-radius:7px;background:var(--lime);color:#0a1109;font-size:7px;font-weight:900}
+.root :global(.active-membership aside>a b){font-size:15px}
+.root :global(.plans-help){min-height:105px;margin-top:18px;padding:23px 27px;display:grid;grid-template-columns:190px 1fr auto;align-items:center;gap:25px;border:1px solid #ffffff0f;border-radius:13px;background:#0d1512}
+.root :global(.plans-help span){color:var(--lime);font-size:7px;font-weight:900;letter-spacing:1.2px}
+.root :global(.plans-help p){margin:0;color:#77837d;font-size:8px}
+.root :global(.plans-help a){padding:13px 15px;border:1px solid #ffffff19;border-radius:6px;color:#dfe4e1;font-size:7px;font-weight:900}
+.root :global(.plans-mobile-head){display:none}
+
+/* Aproveitamento maior da tela no computador */
+@media(min-width:1050px){
+  .root :global(.portal-content){width:min(1220px,93%)}
+  .root :global(.next-booking){min-height:285px;padding:46px 52px}
+  .root :global(.booking-head){min-height:215px;padding:48px 54px}
+  .root :global(.booking-head h2){font-size:49px}
+  .root :global(.booking-progress){padding-inline:54px}
+  .root :global(.booking-step){padding:45px 54px}
+  .root :global(.booking-builder .service-catalog){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .root :global(.booking-flow){display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+  .root :global(.booking-progress),.root :global(.service-step),.root :global(.professional-step),.root :global(.booking-summary){grid-column:1/3}
+  .root :global(.date-step){grid-column:1;border-right:1px solid var(--book-line)}
+  .root :global(.slot-step){grid-column:2}
+  .root :global(.date-step),.root :global(.slot-step){min-height:455px}
+  .root :global(.date-step .seven-days){grid-template-columns:repeat(4,1fr)}
+  .root :global(.date-step .seven-days button){min-height:110px}
+  .root :global(.slot-step .slot-groups>div>div){display:grid;grid-template-columns:repeat(4,1fr)}
+  .root :global(.slot-step .slot-groups button){min-width:0}
+}
+
+@media(max-width:850px){
+  .root :global(.membership-card button){width:100%;min-height:46px}
+  .root:global(.plans-shell){padding:0 0 90px}
+  .root :global(.plans-mobile-head){height:64px;padding:0 16px;position:sticky;z-index:30;top:0;display:flex;align-items:center;gap:11px;border-bottom:1px solid #ffffff10;background:#080d0cef;backdrop-filter:blur(14px)}
+  .root :global(.plans-mobile-head>button){width:34px;height:34px;border:1px solid #ffffff12;border-radius:50%;background:#ffffff08;color:white;font-size:16px}
+  .root :global(.plans-mobile-head img){border-radius:5px}
+  .root :global(.plans-mobile-head>div){display:flex;flex-direction:column;gap:3px}
+  .root :global(.plans-mobile-head small){color:#66736d;font-size:5px;letter-spacing:1.2px}
+  .root :global(.plans-mobile-head strong){font-size:9px}
+  .root :global(.plans-page){width:100%;padding:18px 14px}
+  .root :global(.plans-back){display:none}
+  .root :global(.plans-hero){min-height:310px;padding:34px 24px;align-items:flex-start;border-radius:16px}
+  .root :global(.plans-hero h1){font-size:40px;letter-spacing:-1.8px}
+  .root :global(.plans-hero>div>span){max-width:270px;font-size:9px}
+  .root :global(.plans-hero>strong){width:82px;height:82px;position:absolute;right:18px;bottom:18px;font-size:28px}
+  .root :global(.plans-heading){margin:34px 3px 18px;align-items:flex-start;flex-direction:column;gap:12px}
+  .root :global(.plans-heading h2){font-size:31px}
+  .root :global(.plans-heading p){font-size:8px}
+  .root :global(.client-plan-grid){grid-template-columns:1fr}
+  .root :global(.client-plan-grid article){min-height:390px}
+  .root :global(.active-membership){grid-template-columns:1fr}
+  .root :global(.active-plan-main){padding:31px 23px}
+  .root :global(.active-plan-main h2){font-size:31px}
+  .root :global(.active-plan-main ul){grid-template-columns:1fr}
+  .root :global(.active-membership aside){padding:21px;border-left:0;border-top:1px solid #ffffff10}
+  .root :global(.plans-help){padding:23px;grid-template-columns:1fr;gap:10px}
+  .root :global(.plans-help a){margin-top:8px;text-align:center}
+}
