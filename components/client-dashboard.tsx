@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import AppointmentsDashboard from "@/components/appointments-dashboard";
+import { ClientMobileNav, ClientSection, ClientSidebar, ClientTopbar } from "@/components/client-navigation";
 import styles from "./client-dashboard.module.css";
 
 type Service = { id:string; name:string; price_cents:number; duration_minutes:number };
@@ -80,6 +80,7 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
   const [profile,setProfile] = useState(initialProfile);
   const [view,setView] = useState<"home"|"appointments"|"profile"|"plans">("home");
   const [bookingStage,setBookingStage] = useState(1);
+  const [activeSection,setActiveSection] = useState<ClientSection>("home");
   const blocked = Boolean(profile?.booking_blocked_until&&new Date(profile.booking_blocked_until)>new Date());
   const next = useMemo(()=>appointments.filter(a=>["scheduled","confirmed"].includes(a.status)&&new Date(a.starts_at)>new Date()).sort((a,b)=>a.starts_at.localeCompare(b.starts_at))[0],[appointments]);
   const selected = services.find(item=>item.id===service);
@@ -88,26 +89,28 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
 
   useEffect(()=>{if(!service||!professional||!date)return;let active=true;(async()=>{setLoading(true);setFeedback("");const {data,error}=await createClient().rpc("available_slots",{p_professional_id:professional,p_service_id:service,p_date:date});if(active){setSlots(error?[]:(data||[]).map((item:{starts_at:string})=>item.starts_at));setSlot("");setLoading(false);if(error)setFeedback("Não foi possível consultar a agenda agora.");}})();return()=>{active=false};},[service,professional,date]);
   useEffect(()=>{const syncHash=()=>{const hash=window.location.hash;if(hash==="#meus-agendamentos")setView("appointments");else if(hash==="#perfil")setView("profile");else if(hash==="#plano")setView("plans");else setView("home");};const timer=window.setTimeout(syncHash,0);window.addEventListener("hashchange",syncHash);window.addEventListener("popstate",syncHash);return()=>{window.clearTimeout(timer);window.removeEventListener("hashchange",syncHash);window.removeEventListener("popstate",syncHash);};},[]);
+  useEffect(()=>{if(view!=="home")return;const sync=()=>{const booking=document.getElementById("agendar");setActiveSection(booking&&window.scrollY>=booking.offsetTop-180?"booking":"home");};sync();window.addEventListener("scroll",sync,{passive:true});return()=>window.removeEventListener("scroll",sync);},[view]);
   async function book(){if(!slot)return;setLoading(true);setFeedback("");const {error}=await createClient().rpc("create_appointment",{p_professional_id:professional,p_service_id:service,p_starts_at:slot,p_client_notes:null});if(error){setFeedback(error.message);setLoading(false);return;}setSuccess(true);setLoading(false);}
   async function cancel(id:string){if(!confirm("Cancelar este horário? Você poderá reagendar conforme a disponibilidade."))return;const {error}=await createClient().rpc("cancel_my_appointment",{p_appointment_id:id});if(error)setFeedback(error.message);else setAppointments(list=>list.map(item=>item.id===id?{...item,status:"cancelled"}:item));}
-  function showAppointments(){window.history.replaceState(null,"","/cliente#meus-agendamentos");setView("appointments");window.scrollTo({top:0,behavior:"instant"});}
-  function showProfile(){window.history.replaceState(null,"","/cliente#perfil");setView("profile");window.scrollTo({top:0,behavior:"instant"});}
-  function showPlans(){window.history.replaceState(null,"","/cliente#plano");setView("plans");window.scrollTo({top:0,behavior:"instant"});}
-  function showHome(section="inicio"){if(section==="plano"){showPlans();return;}setView("home");window.history.replaceState(null,"",`/cliente#${section}`);window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({behavior:"smooth",block:"start"})));}
+  function showAppointments(){setActiveSection("appointments");window.history.replaceState(null,"","/cliente#meus-agendamentos");setView("appointments");window.scrollTo({top:0,behavior:"instant"});}
+  function showProfile(){setActiveSection("profile");window.history.replaceState(null,"","/cliente#perfil");setView("profile");window.scrollTo({top:0,behavior:"instant"});}
+  function showPlans(){setActiveSection("plans");window.history.replaceState(null,"","/cliente#plano");setView("plans");window.scrollTo({top:0,behavior:"instant"});}
+  function showHome(section="inicio"){if(section==="plano"){showPlans();return;}if(section==="perfil"){showProfile();return;}if(section==="meus-agendamentos"){showAppointments();return;}setActiveSection(section==="agendar"?"booking":"home");setView("home");window.history.replaceState(null,"",`/cliente#${section}`);window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({behavior:"smooth",block:"start"})));}
+  function navigateClient(section:ClientSection){if(section==="appointments")showAppointments();else if(section==="plans")showPlans();else if(section==="profile")showProfile();else showHome(section==="booking"?"agendar":"inicio");}
   function advanceBooking(stage:number){setBookingStage(stage);window.setTimeout(()=>document.querySelector(".booking-builder")?.scrollIntoView({behavior:"smooth",block:"start"}),80);}
   function chooseService(id:string){setService(id);setSlot("");advanceBooking(2);}
   function chooseProfessional(id:string){setProfessional(id);setSlot("");advanceBooking(3);}
   function chooseDate(value:string){setDate(value);setSlot("");advanceBooking(4);}
 
-  if(view==="appointments") return <AppointmentsDashboard profile={profile} appointments={appointments} professionals={professionals} onNavigateHome={showHome}/>;
-  if(view==="profile") return <ProfilePanel profile={profile} accountEmail={accountEmail} onUpdated={setProfile} onBack={showHome}/>;
-  if(view==="plans") return <PlansPanel profile={profile} membership={membership} plans={plans} onBack={showHome}/>;
+  if(view==="appointments") return <AppointmentsDashboard profile={profile} appointments={appointments} professionals={professionals} onNavigate={navigateClient}/>;
+  if(view==="profile") return <ProfilePanel profile={profile} accountEmail={accountEmail} onUpdated={setProfile} onNavigate={navigateClient}/>;
+  if(view==="plans") return <PlansPanel profile={profile} membership={membership} plans={plans} onNavigate={navigateClient}/>;
   const morning=slots.filter(item=>Number(time(item).slice(0,2))<12), afternoon=slots.filter(item=>{const h=Number(time(item).slice(0,2));return h>=12&&h<18}), evening=slots.filter(item=>Number(time(item).slice(0,2))>=18);
 
   return <main className={`${styles.root} portal-shell`}>
-    <aside className="portal-side"><Link href="/" className="prime-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={48} height={48}/><span>NEEMIAS <b>PRIME</b></span></Link><nav><a className="active" href="#inicio"><i>⌂</i> Visão geral</a><a href="#agendar"><i>＋</i> Agendar</a><button type="button" onClick={showAppointments}><i>◷</i> Meus agendamentos</button><button type="button" onClick={showPlans}><i>♙</i> Meu plano</button><button type="button" onClick={showProfile}><i>◎</i> Editar perfil</button>{profile?.role==="admin"&&<Link prefetch={false} href="/admin"><i>▦</i> Administração</Link>}</nav><Link className="logout" href="/sair">Sair da conta</Link></aside>
+    <ClientSidebar active={activeSection} profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={navigateClient}/>
     <section className="portal-main">
-      <header className="portal-top"><Link href="/" className="mobile-brand"><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={35} height={35}/><b>NEEMIAS PRIME</b></Link><div><small>ÁREA DO CLIENTE</small><strong>{profile?.full_name||"Cliente Prime"}</strong></div><button type="button" className="profile-trigger" onClick={showProfile} aria-label="Abrir e editar meu perfil"><span className="client-avatar">{(profile?.full_name||"NP").split(" ").slice(0,2).map(x=>x[0]).join("")}</span><i aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4Zm9.7-13.7 4 4M14.8 5.2l1.4-1.4a1.4 1.4 0 0 1 2 0l2 2a1.4 1.4 0 0 1 0 2l-1.4 1.4"/></svg></i><small>Editar</small></button></header>
+      <ClientTopbar active={activeSection} profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={navigateClient}/>
       <div className="portal-content" id="inicio">
         {blocked&&<div className="blocked-banner"><b>!</b><div><strong>Agendamentos bloqueados temporariamente</strong><span>Você poderá marcar novamente em {dateTime(profile!.booking_blocked_until!)}</span></div></div>}
         <section className="portal-welcome"><div><p className="metal-kicker">SUA ÁREA PRIME</p><h1>Olá, {profile?.full_name?.split(" ")[0]||"cliente"}<em>.</em></h1><p>Seu próximo cuidado, sem ligação e sem espera.</p></div>{membership&&<span className="member-seal">MEMBRO<br/><b>PRIME</b></span>}</section>
@@ -127,26 +130,25 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
         <button type="button" onClick={showAppointments} className="appointments-shortcut"><span>◷</span><div><small>SEUS HORÁRIOS EM UM SÓ LUGAR</small><strong>Ver meus agendamentos</strong><p>Acompanhe, cancele ou reagende seus atendimentos.</p></div><i>→</i></button>
       </div>
     </section>
-    <nav className="mobile-nav"><a href="#inicio"><i>⌂</i><span>Início</span></a><a className="book-tab" href="#agendar"><i>＋</i><span>Agendar</span></a><button type="button" onClick={showAppointments}><i>◷</i><span>Horários</span></button><button type="button" onClick={showPlans}><i>♙</i><span>Plano</span></button><button type="button" className="profile-tab" onClick={showProfile} aria-label="Editar perfil"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-4 2.9-6 6.5-6s5.8 2 6.5 6"/></svg></i><span>Perfil</span></button></nav>
+    <ClientMobileNav active={activeSection} onNavigate={navigateClient}/>
     {success&&<div className="booking-success"><section><div className="success-mark">✓</div><p>HORÁRIO RESERVADO</p><h2>Está marcado!</h2><span>{selected?.name} com <b>{selectedProfessional?.name}</b><br/>{selectedDay?.week}, {selectedDay?.day} de {selectedDay?.month} às <b>{time(slot)}</b></span><button onClick={()=>location.reload()}>VER MEU AGENDAMENTO <i>→</i></button></section></div>}
   </main>;
 }
 
-function PlansPanel({profile,membership,plans,onBack}:{profile:Profile|null;membership:Membership|null;plans:Plan[];onBack:(section?:string)=>void}) {
+function PlansPanel({profile,membership,plans,onNavigate}:{profile:Profile|null;membership:Membership|null;plans:Plan[];onNavigate:(section:ClientSection)=>void}) {
   const firstName=profile?.full_name?.split(" ")[0]||"cliente";
   const whatsapp=(plan:Plan)=>`https://wa.me/5521959438832?text=${encodeURIComponent(`Olá! Sou ${profile?.full_name||"cliente"} e quero saber mais sobre o plano ${plan.name}.`)}`;
-  return <main className={`${styles.root} plans-shell`}>
-    <header className="plans-mobile-head"><button type="button" onClick={()=>onBack("inicio")}>←</button><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={36} height={36}/><div><small>CLUBE NEEMIAS PRIME</small><strong>Planos</strong></div></header>
-    <section className="plans-page">
-      <button type="button" className="plans-back" onClick={()=>onBack("inicio")}>← VOLTAR PARA O INÍCIO</button>
+  return <main className={`${styles.root} portal-shell`}>
+    <ClientSidebar active="plans" profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={onNavigate}/>
+    <section className="portal-main plans-shell"><ClientTopbar active="plans" profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={onNavigate}/><div className="plans-page">
       <header className="plans-hero"><div><p>CLUBE NEEMIAS PRIME</p><h1>{membership?<>Seu plano está<br/><em>em dia.</em></>:<>Seu estilo não precisa<br/><em>esperar.</em></>}</h1><span>{membership?`${firstName}, acompanhe aqui seu benefício e a próxima data de vencimento.`:"Escolha o plano que combina com sua rotina e fale diretamente com nossa equipe."}</span></div><strong>NP<small>MEMBRO PRIME</small></strong></header>
       {membership?.plans?<section className="active-membership"><div className="active-plan-main"><span className="active-badge">● PLANO ATIVO</span><p>SEU PLANO ATUAL</p><h2>{membership.plans.name}</h2><div className="active-plan-price"><strong>{money(membership.plans.price_cents)}</strong><small>/mês</small></div><ul><li>✓ {planBenefit(membership.plans.benefit_type)}</li><li>✓ Válido: {planDays(membership.plans.allowed_weekdays)}</li><li>✓ Benefício aplicado automaticamente ao agendar</li></ul></div><aside><div><small>INÍCIO DO CICLO</small><strong>{planDate(membership.starts_on)}</strong></div><div className="due-date"><small>VENCIMENTO</small><strong>{planDate(membershipDue(membership))}</strong><span>Mantenha sua mensalidade em dia para continuar usando o benefício.</span></div><a href="https://wa.me/5521959438832?text=Ol%C3%A1%21%20Preciso%20falar%20sobre%20meu%20plano%20Neemias%20Prime." target="_blank" rel="noreferrer">FALAR SOBRE MEU PLANO <b>→</b></a></aside></section>:<><div className="plans-heading"><div><small>PLANOS DISPONÍVEIS</small><h2>Escolha sua frequência.</h2></div><p>Todos os planos são ativados pela equipe da barbearia e aparecem automaticamente no seu agendamento.</p></div><section className="client-plan-grid">{plans.map((plan,index)=><article className={index===1?"featured-plan":""} key={plan.id}>{index===1&&<span className="plan-popular">MAIS ESCOLHIDO</span>}<header><small>PLANO 0{index+1}</small><h3>{plan.name}</h3></header><div className="client-plan-price"><span>R$</span><strong>{(plan.price_cents/100).toFixed(2).replace(".",",")}</strong><small>/mês</small></div><ul><li><i>✓</i>{planBenefit(plan.benefit_type)}</li><li><i>✓</i>{planDays(plan.allowed_weekdays)}</li><li><i>✓</i>Agendamento online</li><li><i>✓</i>Benefício automático</li></ul><a href={whatsapp(plan)} target="_blank" rel="noreferrer">QUERO ESTE PLANO <b>→</b></a></article>)}</section></>}
       <footer className="plans-help"><span>FICOU COM ALGUMA DÚVIDA?</span><p>Nossa equipe explica a cobertura e ajuda você a escolher o melhor plano.</p><a href="https://wa.me/5521959438832" target="_blank" rel="noreferrer">CHAMAR NO WHATSAPP →</a></footer>
-    </section>
+    </div></section><ClientMobileNav active="plans" onNavigate={onNavigate}/>
   </main>;
 }
 
-function ProfilePanel({profile,accountEmail,onUpdated,onBack}:{profile:Profile|null;accountEmail:string;onUpdated:(profile:Profile|null)=>void;onBack:(section?:string)=>void}) {
+function ProfilePanel({profile,accountEmail,onUpdated,onNavigate}:{profile:Profile|null;accountEmail:string;onUpdated:(profile:Profile|null)=>void;onNavigate:(section:ClientSection)=>void}) {
   const [fullName,setFullName]=useState(profile?.full_name||"");
   const [phone,setPhone]=useState(profile?.phone||"");
   const [password,setPassword]=useState("");
@@ -172,10 +174,9 @@ function ProfilePanel({profile,accountEmail,onUpdated,onBack}:{profile:Profile|n
     setPassword("");setConfirmation("");setMessage("Perfil atualizado com sucesso.");setSaving(false);
   }
 
-  return <main className={`${styles.root} profile-shell`}>
-    <header className="profile-mobile-head"><button type="button" onClick={()=>onBack("inicio")}>←</button><Image src="/logo-neemias-prime.png" alt="Neemias Prime" width={36} height={36}/><div><small>ÁREA DO CLIENTE</small><strong>Meu perfil</strong></div></header>
-    <section className="profile-page">
-      <button type="button" className="profile-back" onClick={()=>onBack("inicio")}>← VOLTAR PARA O INÍCIO</button>
+  return <main className={`${styles.root} portal-shell`}>
+    <ClientSidebar active="profile" profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={onNavigate}/>
+    <section className="portal-main profile-shell"><ClientTopbar active="profile" profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={onNavigate}/><div className="profile-page">
       <div className="profile-intro"><div className="profile-avatar-large">{(profile?.full_name||"NP").split(" ").slice(0,2).map(x=>x[0]).join("")}</div><div><p>MINHA CONTA PRIME</p><h1>Seu perfil, do seu jeito.</h1><span>Mantenha seus dados atualizados para facilitar o atendimento.</span></div></div>
       <form className="profile-form" onSubmit={save}>
         <section><header><span>01</span><div><h2>Dados pessoais</h2><p>Informações utilizadas pela barbearia.</p></div></header><div className="profile-fields"><label>Nome completo<input value={fullName} onChange={event=>setFullName(event.target.value)} autoComplete="name" required/></label><label>Telefone<input value={phone} onChange={event=>setPhone(event.target.value)} type="tel" inputMode="tel" autoComplete="tel" placeholder="(21) 99999-9999"/></label><label className="full-field">E-mail da conta<input value={accountEmail} disabled/><small>O e-mail de acesso não pode ser alterado por aqui.</small></label></div></section>
@@ -183,6 +184,6 @@ function ProfilePanel({profile,accountEmail,onUpdated,onBack}:{profile:Profile|n
         {error&&<div className="profile-feedback error">{error}</div>}{message&&<div className="profile-feedback success">✓ {message}</div>}
         <footer><div><small>PRIVACIDADE</small><span>Seus dados são usados apenas para sua experiência na Neemias Prime.</span></div><button disabled={saving}>{saving?"SALVANDO...":"SALVAR ALTERAÇÕES"}<i>→</i></button></footer>
       </form>
-    </section>
+    </div></section><ClientMobileNav active="profile" onNavigate={onNavigate}/>
   </main>;
 }

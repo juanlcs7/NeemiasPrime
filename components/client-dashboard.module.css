@@ -300,3 +300,15 @@
   .root :global(.plans-help){padding:23px;grid-template-columns:1fr;gap:10px}
   .root :global(.plans-help a){margin-top:8px;text-align:center}
 }
+
+/* Páginas internas com a mesma estrutura de navegação */
+.root :global(.plans-shell){min-height:100svh;padding:0 0 75px;background:radial-gradient(circle at 82% 8%,#183f35 0,transparent 29%),#080d0c;color:#f2f5f0}
+.root :global(.plans-shell .plans-page){padding-top:42px}
+.root :global(.profile-shell){min-height:100svh;padding:0 0 80px;background:radial-gradient(circle at 88% 11%,#dce7d2 0,transparent 30%),#efeee9}
+.root :global(.profile-shell .profile-page){padding-top:55px}
+@media(max-width:850px){
+  .root :global(.plans-shell){padding-bottom:90px}
+  .root :global(.plans-shell .plans-page){padding-top:18px}
+  .root :global(.profile-shell){padding-bottom:95px}
+  .root :global(.profile-shell .profile-page){padding-top:18px}
+}
