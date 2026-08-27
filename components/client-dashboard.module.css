@@ -5,6 +5,124 @@
 @media(max-width:430px){.root :global(.booking-head>span){display:none}.root :global(.slot-groups>div>div){grid-template-columns:repeat(3,1fr)}.root :global(.professional-picker button){padding:16px 10px}.root :global(.next-actions){align-items:flex-start;flex-direction:column;gap:9px}.root :global(.booking-success section){padding:42px 24px}.root :global(.booking-success h2){font-size:38px}}
 @media(prefers-reduced-motion:reduce){.root *{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
+/* Booking Studio — fluxo de agendamento com linguagem de barbearia */
+.root :global(.booking-builder){--book-bg:#080d0c;--book-card:#101816;--book-line:#ffffff14;position:relative;color:#f4f6f1;border:1px solid #17231f;background:var(--book-bg);box-shadow:0 34px 80px #07110d38;isolation:isolate}
+.root :global(.booking-builder:before){content:"BARBER STUDIO";position:absolute;z-index:-1;right:-34px;top:260px;color:#ffffff035;font:900 104px/.8 Arial,sans-serif;letter-spacing:-7px;writing-mode:vertical-rl;pointer-events:none}
+.root :global(.booking-builder:after){content:"";position:absolute;z-index:-1;inset:0;opacity:.16;pointer-events:none;background-image:repeating-linear-gradient(115deg,transparent 0 17px,#ffffff08 17px 18px)}
+.root :global(.booking-head){min-height:190px;padding:42px 45px;color:white;border-bottom:1px solid var(--book-line);background:radial-gradient(circle at 78% 20%,#1d4b3e 0,transparent 35%),linear-gradient(120deg,#080d0c,#111b18)}
+.root :global(.booking-head .metal-kicker){color:var(--lime)}
+.root :global(.booking-head h2){max-width:620px;color:#f5f7f1;font-size:44px;line-height:.96;letter-spacing:-1.8px}
+.root :global(.booking-head>div>p:last-child){color:#87948e}
+.root :global(.booking-head>span){border-color:#b9ff3861;color:#8e9b95;box-shadow:inset 0 0 28px #b9ff3808,0 0 30px #0004}
+.root :global(.booking-head>span b){color:var(--lime)}
+.root :global(.booking-flow){position:relative}
+.root :global(.booking-progress){height:92px;padding:0 45px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;border-bottom:1px solid var(--book-line);background:#0a100eeb;backdrop-filter:blur(12px)}
+.root :global(.booking-progress button){height:100%;position:relative;padding:0;border:0;background:transparent;color:#53605b;display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer}
+.root :global(.booking-progress button:not(:last-child):after){content:"";position:absolute;left:46px;right:18px;top:50%;height:1px;background:#ffffff10}
+.root :global(.booking-progress button b){width:34px;height:34px;position:relative;z-index:2;display:grid;place-items:center;border:1px solid #ffffff18;border-radius:50%;background:#0b1210;color:#65716c;font-size:7px}
+.root :global(.booking-progress button span){position:relative;z-index:2;padding-right:11px;background:#0a100e;color:inherit;font-size:7px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}
+.root :global(.booking-progress button.active),.root :global(.booking-progress button.complete){color:#dbe4df}
+.root :global(.booking-progress button.active b){border-color:var(--lime);background:var(--lime);color:#0a1109;box-shadow:0 0 23px #b9ff3831}
+.root :global(.booking-progress button.complete b){border-color:#668b28;background:#182519;color:var(--lime)}
+.root :global(.booking-step){padding:42px 45px;border-bottom:1px solid var(--book-line);background:linear-gradient(100deg,#0a100f,#0d1512)}
+.root :global(.booking-step>header){margin-bottom:28px}
+.root :global(.booking-step>header>b){border:1px solid #b9ff3830;background:#b9ff380a;box-shadow:inset 0 0 18px #b9ff3808}
+.root :global(.booking-step>header h3){color:#f3f5f0;font-size:27px;letter-spacing:-.5px}
+.root :global(.booking-step>header p){color:#68756f;letter-spacing:.5px}
+.root :global(.service-catalog){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.root :global(.service-catalog button){min-height:76px;padding:13px 15px;display:grid;grid-template-columns:44px 1fr auto 20px;align-items:center;gap:12px;border:1px solid #ffffff12;border-radius:9px;background:#111916;color:#eef2ed;text-align:left;cursor:pointer;transition:transform .22s,border-color .22s,background .22s}
+.root :global(.service-catalog button:hover){transform:translateY(-2px);border-color:#b9ff3848;background:#141f1b}
+.root :global(.service-symbol){width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffffff16;border-radius:50%;background:#080e0c;color:#a6b1ac;font:400 16px Georgia,serif}
+.root :global(.service-name){display:flex;flex-direction:column;gap:5px}
+.root :global(.service-name strong){font-size:9px}
+.root :global(.service-name small){color:#6d7973;font-size:7px}
+.root :global(.service-catalog button>b){color:#dfe5e1;font:400 16px Georgia,serif}
+.root :global(.service-catalog button>i){color:#48534e;font-size:7px;font-style:normal;text-align:right}
+.root :global(.service-catalog button.selected){border-color:#b9ff3875;background:linear-gradient(110deg,#15231d,#101915);box-shadow:inset 3px 0 var(--lime),0 14px 28px #0003}
+.root :global(.service-catalog button.selected .service-symbol){border-color:var(--lime);background:var(--lime);color:#0b100e}
+.root :global(.service-catalog button.selected>i){color:var(--lime)}
+.root :global(.service-detail){margin-top:12px;border:1px solid #ffffff0b;background:#070c0b;color:#e8ece8}
+.root :global(.service-detail small),.root :global(.summary-price small){color:#626e69}
+.root :global(.service-detail>i){background:#ffffff13}
+.root :global(.service-detail em){color:#74817b}
+.root :global(.professional-step){overflow:hidden}
+.root :global(.professional-picker){grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.root :global(.professional-picker button){min-height:310px;padding:0;overflow:hidden;display:flex;flex-direction:column;border:1px solid #ffffff13;border-radius:12px;background:#101815;color:white;box-shadow:0 18px 38px #0002;text-align:left}
+.root :global(.professional-picker button:hover){transform:translateY(-5px);border-color:#b9ff385a}
+.root :global(.professional-photo){width:100%;height:210px;position:relative;display:block;overflow:hidden;border-radius:0;background:#0c1411}
+.root :global(.professional-photo>img){object-fit:cover;object-position:center 22%;filter:saturate(.76) contrast(1.06);transition:transform .45s,filter .3s}
+.root :global(.professional-picker button:hover .professional-photo>img){transform:scale(1.045);filter:saturate(.95) contrast(1.06)}
+.root :global(.professional-photo:after){content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#0d1512 100%);pointer-events:none}
+.root :global(.professional-photo>i){width:auto;height:auto;position:absolute;z-index:3;right:12px;top:12px;margin:0;padding:6px 7px;border:1px solid #ffffff22;border-radius:5px;background:#07100eb8;color:#d6ded9;font-size:6px;font-style:normal;backdrop-filter:blur(8px)}
+.root :global(.professional-fallback){position:absolute;inset:0;display:flex!important;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 18%,#274b41,#101916 55%,#090e0c);color:#eff3ee}
+.root :global(.professional-fallback:after){content:"";width:105px;height:105px;position:absolute;border:1px solid #b9ff3824;border-radius:50%;box-shadow:0 0 0 18px #b9ff3803}
+.root :global(.professional-fallback b){position:relative;z-index:2;font:400 35px Georgia,serif;letter-spacing:-2px}
+.root :global(.professional-fallback small){position:relative;z-index:2;margin-top:8px;color:#8a9690;font-size:5px;letter-spacing:1.5px}
+.root :global(.professional-photo>img+.professional-fallback){opacity:0}
+.root :global(.professional-info){width:100%;padding:17px 16px 18px;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.root :global(.professional-info small){margin:0;color:#8b9691;font-size:6px;font-weight:800;letter-spacing:1px}
+.root :global(.professional-info small i){width:5px;height:5px;display:inline-block;border-radius:50%;background:var(--lime);box-shadow:0 0 9px #b9ff38}
+.root :global(.professional-info strong){font:400 19px Georgia,serif}
+.root :global(.professional-info em){color:#65716b;font-size:7px;font-style:normal}
+.root :global(.professional-check){width:29px;height:29px;position:absolute;z-index:4;right:13px;bottom:17px;display:grid;place-items:center;border:1px solid #ffffff19;border-radius:50%;background:#0b1210;color:transparent;font-size:8px}
+.root :global(.professional-picker button.selected){border-color:var(--lime);background:#121d19;box-shadow:0 0 0 1px #b9ff382b,0 22px 48px #0005}
+.root :global(.professional-picker button.selected .professional-check){border-color:var(--lime);background:var(--lime);color:#0a1109;box-shadow:0 0 18px #b9ff3838}
+.root :global(.professional-picker button.selected .professional-info em){color:var(--lime)}
+.root :global(.photo-hint){margin:18px 0 0;color:#65716b;font-size:7px;line-height:1.6}
+.root :global(.seven-days button){border-color:#ffffff13;background:#111916;color:#eef2ed}
+.root :global(.seven-days small),.root :global(.seven-days span){color:#6d7973}
+.root :global(.seven-days button.today:not(.selected)){border-color:#63726b}
+.root :global(.seven-days button.selected){border-color:var(--lime);background:var(--lime);color:#0a1009;box-shadow:0 14px 30px #0003}
+.root :global(.seven-days button:disabled){background:#0c1210;color:#5e6964}
+.root :global(.slot-groups>div>small){color:#75817b}
+.root :global(.slot-groups button){border-color:#ffffff13;background:#111916;color:#dfe5e1}
+.root :global(.slot-groups button:hover){border-color:#b9ff3866}
+.root :global(.slot-groups button.selected){border-color:var(--lime);background:var(--lime);color:#0a1009}
+.root :global(.slot-groups button.selected i){color:#0a1009}
+.root :global(.slots-loading),.root :global(.no-slots){border:1px solid #ffffff0d;background:#0a100e;color:#738079}
+.root :global(.no-slots b){color:#e7ece8}
+.root :global(.booking-summary){padding:27px 38px;border-top:1px solid #b9ff3828;background:#080d0c}
+.root :global(.booking-summary:not(.ready)){color:#8a9690}
+.root :global(.booking-summary.ready){background:radial-gradient(circle at 15% 0,#1c4439,#0b1210 48%)}
+
+@media(max-width:850px){
+  .root :global(.booking-builder){margin-left:-16px;margin-right:-16px;border-left:0;border-right:0;border-radius:0;box-shadow:0 24px 55px #06100d38;scroll-margin-top:64px}
+  .root :global(.booking-builder:before){display:none}
+  .root :global(.booking-head){min-height:176px;padding:31px 22px;background:radial-gradient(circle at 100% 0,#1d4b3e 0,transparent 44%),#09100e}
+  .root :global(.booking-head h2){max-width:270px;font-size:38px;line-height:.94}
+  .root :global(.booking-progress){height:78px;position:sticky;z-index:22;top:64px;padding:0 15px;grid-template-columns:repeat(4,1fr);background:#09100ef4;box-shadow:0 12px 30px #0003}
+  .root :global(.booking-progress button){justify-content:center;gap:5px;flex-direction:column}
+  .root :global(.booking-progress button:not(:last-child):after){left:64%;right:-36%;top:29px}
+  .root :global(.booking-progress button b){width:27px;height:27px}
+  .root :global(.booking-progress button span){padding:0;background:transparent;font-size:5.5px;letter-spacing:.6px}
+  .root :global(.booking-step){display:none;min-height:530px;padding:29px 18px 120px;animation:bookingStageIn .32s ease-out}
+  .root :global(.booking-step.stage-active){display:block}
+  .root :global(.booking-step>header){align-items:flex-start;margin-bottom:23px}
+  .root :global(.booking-step>header h3){max-width:270px;font-size:25px;line-height:1}
+  .root :global(.service-catalog){grid-template-columns:1fr;gap:8px}
+  .root :global(.service-catalog button){min-height:74px;grid-template-columns:42px 1fr auto 18px;padding:12px}
+  .root :global(.service-detail){padding:14px;display:grid;grid-template-columns:1fr 1px auto;gap:12px}
+  .root :global(.service-detail em){grid-column:1/4}
+  .root :global(.professional-picker){margin:0 -18px;padding:0 18px 18px;display:flex;gap:11px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .root :global(.professional-picker::-webkit-scrollbar){display:none}
+  .root :global(.professional-picker button){width:74vw;min-width:74vw;max-width:310px;min-height:365px;scroll-snap-align:center}
+  .root :global(.professional-photo){height:260px}
+  .root :global(.professional-info strong){font-size:22px}
+  .root :global(.photo-hint){margin:8px 2px 0;max-width:320px}
+  .root :global(.seven-days){margin:0 -18px;padding:5px 18px 18px}
+  .root :global(.seven-days button){min-width:82px;min-height:116px}
+  .root :global(.slot-groups>div>div){grid-template-columns:repeat(3,1fr);gap:8px}
+  .root :global(.slot-groups button){height:48px}
+  .root :global(.booking-summary){bottom:76px;margin:0;padding:15px 16px;border-radius:0;box-shadow:0 -16px 35px #0008}
+}
+@media(max-width:390px){
+  .root :global(.booking-head h2){font-size:34px}
+  .root :global(.professional-picker button){width:80vw;min-width:80vw}
+  .root :global(.booking-progress){padding:0 8px}
+  .root :global(.booking-progress button span){font-size:5px}
+}
+@keyframes bookingStageIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+
 /* Meu perfil */
 .root:global(.profile-shell){min-height:100svh;padding:55px 0 80px;background:radial-gradient(circle at 88% 5%,#dce7d2 0,transparent 30%),#efeee9}
 .root :global(.profile-page){width:min(960px,91%);margin:auto}
@@ -51,3 +169,27 @@
 .root :global(.profile-tab svg){width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 @media(min-width:851px){.root :global(.profile-trigger>i),.root :global(.profile-trigger>small){display:none}.root :global(.profile-trigger){padding:0;margin-left:12px}.root :global(.profile-trigger>.client-avatar){margin:0}}
 @media(max-width:850px){.root :global(.portal-top){justify-content:space-between}.root :global(.profile-trigger){display:block;flex:0 0 38px;margin-left:11px}.root :global(.mobile-nav){padding-inline:5px}.root :global(.mobile-nav a),.root :global(.mobile-nav button){min-width:46px}.root :global(.mobile-nav .profile-tab){color:#d9e0dc}.root :global(.mobile-nav .profile-tab i){width:25px;height:23px;display:grid;place-items:center;border-radius:8px;background:#ffffff0a;color:var(--lime)}}
+
+/* Booking Studio — correções finais de especificidade sobre os estilos legados */
+.root :global(.booking-builder .service-catalog){grid-template-columns:repeat(2,minmax(0,1fr));max-height:none;padding:0;overflow:visible;gap:9px;scrollbar-color:#657d4c transparent}
+.root :global(.booking-builder .service-catalog button){min-height:76px;padding:13px 15px;grid-template-columns:44px 1fr auto 20px;gap:12px;border-color:#ffffff12;border-radius:9px;background:#111916;color:#eef2ed}
+.root :global(.booking-builder .service-catalog button:hover){border-color:#b9ff3848;background:#141f1b}
+.root :global(.booking-builder .service-catalog .service-symbol){width:42px;height:42px;border:1px solid #ffffff16;border-radius:50%;background:#080e0c;color:#a6b1ac}
+.root :global(.booking-builder .service-catalog .service-name small){color:#6d7973}
+.root :global(.booking-builder .service-catalog button>i){position:static;color:#48534e;font-size:7px;text-align:right}
+.root :global(.booking-builder .service-catalog button.selected){border-color:#b9ff3875;background:linear-gradient(110deg,#15231d,#101915);box-shadow:inset 3px 0 var(--lime),0 14px 28px #0003}
+.root :global(.booking-builder .service-catalog button.selected .service-symbol){border-color:var(--lime);background:var(--lime);color:#0b100e}
+.root :global(.booking-builder .service-catalog button.selected>i){color:var(--lime)}
+.root :global(.professional-picker button>.professional-photo){width:100%;height:210px;margin:0;position:relative;display:block;border-radius:0;background:#0c1411;color:white}
+.root :global(.professional-picker button>.professional-info){width:100%;height:auto;margin:0;padding:17px 16px 18px;display:flex;align-items:flex-start;border-radius:0;background:transparent;color:white}
+.root :global(.professional-picker button>.professional-check){width:29px;height:29px;margin:0;position:absolute;right:13px;bottom:17px;display:grid;border-radius:50%;background:#0b1210}
+.root :global(.professional-picker .professional-info small){margin:0;color:#8b9691}
+.root :global(.professional-picker .professional-info small i){width:5px;height:5px;position:static;display:inline-block;margin-right:3px;border-radius:50%;background:var(--lime);box-shadow:0 0 9px #b9ff38}
+.root :global(.professional-picker button.selected>.professional-photo){background:#0c1411;color:white}
+.root :global(.professional-picker button.selected>.professional-info){background:transparent;color:white}
+.root :global(.professional-picker button.selected>.professional-check){border-color:var(--lime);background:var(--lime);color:#0a1109}
+@media(max-width:850px){
+  .root :global(.booking-builder .service-catalog){grid-template-columns:1fr;max-height:340px;padding-right:3px;overflow-y:auto}
+  .root :global(.booking-builder .service-catalog button){min-height:70px;padding:11px 12px;grid-template-columns:42px 1fr auto 18px}
+  .root :global(.professional-picker button>.professional-photo){height:260px}
+}
