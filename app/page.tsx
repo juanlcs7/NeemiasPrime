@@ -6,30 +6,36 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const serviceCards = [
-  { n:"01",name:"Corte",price:"R$ 40",note:"Clássico, social ou fade",mark:"C" },
-  { n:"02",name:"Corte + Barba",price:"R$ 70",note:"A experiência completa",mark:"C+B" },
-  { n:"03",name:"Barbaterapia",price:"R$ 60",note:"Toalha quente e cuidado",mark:"BT" },
-  { n:"04",name:"Platinado",price:"R$ 150",note:"Transformação de presença",mark:"PL" },
-  { n:"05",name:"Corte Infantil",price:"R$ 45",note:"Dos 7 aos 11 anos",mark:"K" },
-  { n:"06",name:"Todos os serviços",price:"15 opções",note:"Do acabamento à coloração",mark:"+" },
+const fallbackServices = [
+  { n:"01",name:"Corte",price:"R$ 40",note:"Catálogo temporariamente indisponível",mark:"C" },
+  { n:"02",name:"Corte + Barba",price:"R$ 70",note:"Catálogo temporariamente indisponível",mark:"C+B" },
+  { n:"03",name:"Barbaterapia",price:"R$ 60",note:"Catálogo temporariamente indisponível",mark:"BT" },
+  { n:"04",name:"Platinado",price:"R$ 150",note:"Catálogo temporariamente indisponível",mark:"PL" },
+  { n:"05",name:"Corte Infantil",price:"R$ 45",note:"Catálogo temporariamente indisponível",mark:"K" },
+  { n:"06",name:"Serviços Neemias Prime",price:"Consulte",note:"Catálogo temporariamente indisponível",mark:"+" },
 ];
-const professionals=[
+const fallbackProfessionals=[
   {name:"Breno Sousa",image:"/barbeiros/breno-sousa.png"},
   {name:"Agatha Sousa",image:"/barbeiros/agatha-sousa.png"},
   {name:"Matheus Francisco",image:"/barbeiros/matheus-francisco.png"},
   {name:"Neemias Prime",image:"/barbeiros/neemias-prime.png"},
 ];
-const plans=[
-  {name:"Prime 2x",price:"79,90",caption:"Corte ilimitado",days:"Terça e quinta"},
-  {name:"Prime Week",price:"99,90",caption:"Corte ilimitado",days:"Terça a sábado",popular:true},
-  {name:"Prime Beard",price:"99,90",caption:"Barba ilimitada",days:"Terça a sábado"},
-  {name:"Prime Total",price:"149,90",caption:"Corte + barba",days:"Ilimitados"},
+const fallbackPlans=[
+  {name:"Prime 2x",price:"79,90",caption:"Benefícios Prime",days:"Consulte a equipe"},
+  {name:"Prime Week",price:"99,90",caption:"Benefícios Prime",days:"Consulte a equipe",popular:true},
+  {name:"Prime Beard",price:"99,90",caption:"Benefícios Prime",days:"Consulte a equipe"},
+  {name:"Prime Total",price:"149,90",caption:"Benefícios Prime",days:"Consulte a equipe"},
 ];
+const money = (cents:number) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(cents/100);
+const weekdays = (days:number[]) => { const names=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]; return days.length===7 ? "Todos os dias" : days.map((day)=>names[day]).filter(Boolean).join(" e "); };
+const planCaption = (benefit:string) => benefit === "beard" ? "Barba incluída" : benefit === "cut_beard" ? "Corte + barba incluídos" : "Cortes incluídos";
 
 export default async function Home() {
   let accountPath="/entrar";
   let isAdmin=false;
+  let serviceCards=fallbackServices;
+  let professionals=fallbackProfessionals;
+  let plans=fallbackPlans;
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -38,6 +44,14 @@ export default async function Home() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
       isAdmin=profile?.role === "admin";
     }
+    const [{data:services,error:servicesError},{data:team,error:teamError},{data:catalogPlans,error:plansError}] = await Promise.all([
+      supabase.from("services").select("id,name,price_cents,display_order").eq("active",true).order("display_order").limit(6),
+      supabase.from("professionals").select("id,name,photo_url,display_order").eq("active",true).order("display_order"),
+      supabase.from("plans").select("id,name,price_cents,benefit_type,allowed_weekdays").eq("active",true).order("price_cents"),
+    ]);
+    if (!servicesError && services?.length) serviceCards=services.map((service,index)=>({n:String(index+1).padStart(2,"0"),name:service.name,price:money(service.price_cents),note:"Preço e duração confirmados na agenda",mark:["C","✦","B","+","N","•"][index]||"✦"}));
+    if (!teamError && team?.length) professionals=team.map((professional)=>({name:professional.name,image:professional.photo_url||"/logo-neemias-prime.png"}));
+    if (!plansError && catalogPlans?.length) plans=catalogPlans.map((plan,index)=>({name:plan.name,price:(plan.price_cents/100).toFixed(2).replace(".",","),caption:planCaption(plan.benefit_type),days:weekdays(plan.allowed_weekdays),popular:index===1}));
   } catch {
     // A vitrine pública continua disponível mesmo se o serviço de sessão oscilar.
   }

@@ -17,12 +17,13 @@ const initials = (name = "Cliente") => name.split(" ").filter(Boolean).slice(0, 
 const whatsapp = (phone = "") => { const digits=phone.replace(/\D/g, ""); return `https://wa.me/${digits.startsWith("55")?digits:`55${digits}`}`; };
 const statusLabel: Record<string, string> = { scheduled: "Agendado", confirmed: "Confirmado", completed: "Concluído", cancelled: "Cancelado", no_show: "Não compareceu" };
 const statusTone: Record<string, string> = { scheduled: "blue", confirmed: "green", completed: "neutral", cancelled: "red", no_show: "orange" };
-const professionalPhotos: Record<string, string> = {
-  "Breno Sousa": "/barbeiros/breno-sousa.png",
-  "Agatha Sousa": "/barbeiros/agatha-sousa.png",
-  "Matheus Francisco": "/barbeiros/matheus-francisco.png",
-  "Neemias Prime": "/barbeiros/neemias-prime.png",
-};
+function planState(membership: Item) {
+  const today=dateKey(new Date());
+  if(!membership?.active)return "Encerrado";
+  if(!membership.ends_on||membership.ends_on<today)return "Vencido";
+  const days=Math.round((Date.parse(`${membership.ends_on}T00:00:00Z`)-Date.parse(`${today}T00:00:00Z`))/86400000);
+  return days<=5?`Vence em ${days} dia${days===1?"":"s"}`:"Ativo";
+}
 
 const nav: { id: Tab; label: string; short: string }[] = [
   { id: "overview", label: "Visão geral", short: "VG" },
@@ -32,7 +33,7 @@ const nav: { id: Tab; label: string; short: string }[] = [
   { id: "equipe", label: "Equipe", short: "EQ" },
 ];
 
-export default function AdminDashboard({ adminName, adminActionToken, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
+export default function AdminDashboard({ adminName, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
   const [tab, setTab] = useState<Tab>("overview");
   const [appointments, setAppointments] = useState<Item[]>(initialAppointments);
   const [services, setServices] = useState<Item[]>(initialServices);
@@ -89,8 +90,7 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
   function notify(message: string) { setFeedback(message); window.setTimeout(() => setFeedback(""), 4000); }
 
   async function adminAction(payload:Record<string,unknown>){
-    if(!adminActionToken)throw new Error("Autorização administrativa indisponível. Atualize a página.");
-    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Admin ${adminActionToken}`},body:JSON.stringify(payload)});
+    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
     if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");
     return result;
@@ -128,16 +128,27 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
 
   async function assignPlan(clientId: string, planId: string) {
     setBusy(clientId + "plan");
-    let data:any=null;let error:Error|null=null;try{data=await adminAction({action:"membership_assign",clientId,planId:planId||null});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
+    const current=membershipByClient.get(clientId);
+    let data:any=null;let error:Error|null=null;try{data=planId?await adminAction({action:"membership_assign",clientId,planId}):await adminAction({action:"membership_remove",membershipId:current?.id});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
     setBusy("");
     if (error) return notify(`Erro ao atribuir plano: ${error.message}`);
-    if (!planId) setMemberRows((rows) => rows.filter((row) => row.client_id !== clientId));
+    if (!planId) setMemberRows((rows) => rows.map((row) => row.id === current?.id ? {...row,active:false} : row));
     else {
       const plan = plans.find((row: Item) => row.id === planId);
-      const updated = { id: data?.membershipId || crypto.randomUUID(), client_id: clientId, plan_id: planId, active: true, plans: { name: plan?.name } };
-      setMemberRows((rows) => [...rows.filter((row) => row.client_id !== clientId), updated]);
+      const membership=data?.membership;
+      const updated = { id: membership?.id || crypto.randomUUID(), client_id: clientId, plan_id: planId, active: true, starts_on:membership?.starts_on, ends_on:membership?.ends_on, plans: { name: plan?.name } };
+      setMemberRows((rows) => [...rows.map((row) => row.client_id === clientId ? {...row,active:false} : row), updated]);
     }
     notify(planId ? "Plano do cliente atualizado." : "Plano removido do cliente.");
+  }
+
+  async function renewPlan(membership: Item) {
+    setBusy(membership.id + "renew");
+    let data:any=null;let error:Error|null=null;try{data=await adminAction({action:"membership_renew",membershipId:membership.id});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
+    setBusy("");
+    if(error)return notify(`Não foi possível renovar: ${error.message}`);
+    setMemberRows((rows)=>rows.map((row)=>row.id===membership.id?{...row,ends_on:data?.membership?.ends_on||row.ends_on}:row));
+    notify("Plano renovado para um novo ciclo mensal.");
   }
 
   function openAgenda(filter = "today") { setDateFilter(filter); setStatusFilter("all"); setProFilter("all"); setTab("agenda"); }
@@ -156,7 +167,7 @@ export default function AdminDashboard({ adminName, adminActionToken, appointmen
       {feedback && <div className={styles.toast} role="status" aria-live="polite"><span><Image src="/logo-neemias-prime.png" alt="" width={22} height={22}/></span>{feedback}</div>}
       {tab === "overview" && <Overview adminName={adminName} todayAppointments={todayAppointments} activeToday={activeToday} nextAppointment={nextAppointment} todayRevenue={todayRevenue} todayMembers={todayMembers} professionals={pros} openAgenda={openAgenda} setTab={setTab}/>} 
       {tab === "agenda" && <Agenda appointments={appointmentView} search={appointmentSearch} setSearch={setAppointmentSearch} dateFilter={dateFilter} setDateFilter={setDateFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} proFilter={proFilter} setProFilter={setProFilter} professionals={pros} busy={busy} changeStatus={changeStatus} clock={clock}/>} 
-      {tab === "clientes" && <Clients clients={clientView} allClients={clients} plans={plans} memberships={membershipByClient} search={clientSearch} setSearch={setClientSearch} filter={clientFilter} setFilter={setClientFilter} busy={busy} assignPlan={assignPlan}/>} 
+      {tab === "clientes" && <Clients clients={clientView} allClients={clients} plans={plans} memberships={membershipByClient} search={clientSearch} setSearch={setClientSearch} filter={clientFilter} setFilter={setClientFilter} busy={busy} assignPlan={assignPlan} renewPlan={renewPlan}/>}
       {tab === "servicos" && <Services services={serviceView} total={services.length} search={serviceSearch} setSearch={setServiceSearch} filter={serviceFilter} setFilter={setServiceFilter} busy={busy} saveService={saveService}/>} 
       {tab === "equipe" && <Team professionals={pros} appointments={appointments} busy={busy} toggleProfessional={toggleProfessional} openAgenda={openAgenda}/>} 
     </main>
@@ -225,14 +236,14 @@ function AppointmentCard({ appointment: a, busy, changeStatus, clock }: any) {
   </article>;
 }
 
-function Clients({ clients, allClients, plans, memberships, search, setSearch, filter, setFilter, busy, assignPlan }: any) {
+function Clients({ clients, allClients, plans, memberships, search, setSearch, filter, setFilter, busy, assignPlan, renewPlan }: any) {
   const blockedCount = allClients.filter((c: Item) => c.booking_blocked_until && new Date(c.booking_blocked_until) > new Date()).length;
   return <><PageHead eyebrow="RELACIONAMENTO" title="Clientes e planos" text="Consulte contatos, identifique bloqueios e gerencie o clube mensal sem sair da tela."/>
     <section className={styles.clientSummary}><div><strong>{allClients.length}</strong><span>clientes cadastrados</span></div><div><strong>{memberships.size}</strong><span>planos ativos</span></div><div><strong>{blockedCount}</strong><span>bloqueados agora</span></div></section>
     <section className={styles.filters}><label className={styles.search}><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome ou telefone"/></label><select value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Todos os clientes</option><option value="members">Com plano</option><option value="without">Sem plano</option><option value="blocked">Bloqueados</option></select></section>
     <section className={styles.clientGrid}>{clients.map((client: Item) => { const membership = memberships.get(client.id); const blocked = client.booking_blocked_until && new Date(client.booking_blocked_until) > new Date(); return <article className={styles.clientCard} key={client.id}>
       <div className={styles.clientIdentity}><span className={styles.avatar}>{initials(client.full_name)}</span><div><strong>{client.full_name}</strong>{client.phone?<a href={whatsapp(client.phone)} target="_blank" rel="noreferrer">{client.phone}</a>:<small className={styles.noContact}>Sem telefone cadastrado</small>}</div>{blocked && <em>Bloqueado</em>}</div>
-      <div className={styles.planControl}><label>Plano atual</label><select disabled={busy === client.id + "plan"} value={membership?.plan_id || ""} onChange={(e) => assignPlan(client.id, e.target.value)}><option value="">Sem plano</option>{plans.filter((p: Item) => p.active).map((plan: Item) => <option key={plan.id} value={plan.id}>{plan.name} · {money(plan.price_cents)}</option>)}</select><small>{membership ? `Benefício ativo: ${membership.plans?.name || "plano mensal"}` : "Atendimentos cobrados na barbearia"}</small></div>
+      <div className={styles.planControl}><label>Plano atual</label><select disabled={busy === client.id + "plan"} value={membership?.plan_id || ""} onChange={(e) => assignPlan(client.id, e.target.value)}><option value="">Sem plano</option>{plans.filter((p: Item) => p.active).map((plan: Item) => <option key={plan.id} value={plan.id}>{plan.name} · {money(plan.price_cents)}</option>)}</select>{membership?<><small>{planState(membership)} · até {membership.ends_on}</small><button type="button" disabled={busy===membership.id+"renew"} onClick={()=>renewPlan(membership)}>{busy===membership.id+"renew"?"Renovando...":"Renovar ciclo"}</button></>:<small>Atendimentos cobrados na barbearia</small>}</div>
     </article>; })}</section>
     {!clients.length && <Empty title="Cliente não encontrado" text="Revise a busca ou selecione outro filtro."/>}
   </>;
@@ -248,7 +259,7 @@ function Services({ services, total, search, setSearch, filter, setFilter, busy,
 
 function Team({ professionals, appointments, busy, toggleProfessional, openAgenda }: any) {
   return <><PageHead eyebrow="OPERAÇÃO" title="Equipe" text="Controle quem aparece na agenda e acompanhe a carga de cada profissional."/>
-    <section className={styles.teamGrid}>{professionals.map((pro: Item, index: number) => { const upcoming = appointments.filter((a: Item) => a.professionals?.id === pro.id && ["scheduled", "confirmed"].includes(a.status)).length; const photo=professionalPhotos[pro.name]; return <article className={styles.teamCard} key={pro.id}><div className={styles.proPortrait}>{photo?<Image src={photo} alt={`Foto de ${pro.name}`} fill sizes="(max-width: 560px) 74px, 90px"/>:<span>{initials(pro.name)}</span>}<em>0{index + 1}</em></div><div><span className={pro.active ? styles.available : styles.paused}>{pro.active ? "Disponível" : "Pausado"}</span><h2>{pro.name}</h2><p>{upcoming} atendimento{upcoming === 1 ? "" : "s"} nos próximos 30 dias</p></div><div className={styles.teamActions}><button onClick={() => openAgenda("all")}>Ver agenda</button><button disabled={busy === pro.id + "pro"} className={pro.active ? styles.pauseButton : styles.enableButton} onClick={() => toggleProfessional(pro.id, !pro.active)}>{pro.active ? "Pausar agenda" : "Ativar agenda"}</button></div></article>; })}</section>
+    <section className={styles.teamGrid}>{professionals.map((pro: Item, index: number) => { const upcoming = appointments.filter((a: Item) => a.professionals?.id === pro.id && ["scheduled", "confirmed"].includes(a.status)).length; return <article className={styles.teamCard} key={pro.id}><div className={styles.proPortrait}>{pro.photo_url?<Image src={pro.photo_url} alt={`Foto de ${pro.name}`} fill sizes="(max-width: 560px) 74px, 90px"/>:<span>{initials(pro.name)}</span>}<em>0{index + 1}</em></div><div><span className={pro.active ? styles.available : styles.paused}>{pro.active ? "Disponível" : "Pausado"}</span><h2>{pro.name}</h2><p>{upcoming} atendimento{upcoming === 1 ? "" : "s"} nos próximos 30 dias</p></div><div className={styles.teamActions}><button onClick={() => openAgenda("all")}>Ver agenda</button><button disabled={busy === pro.id + "pro"} className={pro.active ? styles.pauseButton : styles.enableButton} onClick={() => toggleProfessional(pro.id, !pro.active)}>{pro.active ? "Pausar agenda" : "Ativar agenda"}</button></div></article>; })}</section>
   </>;
 }
 

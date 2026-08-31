@@ -123,3 +123,21 @@ npm run build
 ```
 
 O pacote entregue concluiu `typecheck`, `lint` e o build de produção do Next.js.
+
+## Estabilização final (31/08/2026)
+
+Execute `supabase/migrations/20260831_final_stabilization.sql` uma vez no **SQL Editor** antes de publicar esta versão. A migração é idempotente: preserva o histórico dos planos, completa vencimentos que estavam vazios, cria a relação estável entre planos e serviços e adiciona as operações administrativas atômicas. Ela não deve ser executada automaticamente pela aplicação.
+
+Na Vercel, confira somente os nomes destas variáveis (sem expor seus valores):
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+
+O painel administrativo usa a sessão autenticada normal e não precisa de `SUPABASE_SECRET_KEY` nem de `SUPABASE_SERVICE_ROLE_KEY`. Caso tenham sido criadas apenas para a versão anterior do painel, remova-as das variáveis de produção. Nenhuma chave secreta é enviada ao navegador.
+
+Para validar localmente e na Vercel, com Node `22.x`:
+
+```bash
+npm run validate
+```

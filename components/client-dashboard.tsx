@@ -8,11 +8,11 @@ import { ClientMobileNav, ClientSection, ClientSidebar, ClientTopbar } from "@/c
 import styles from "./client-dashboard.module.css";
 
 type Service = { id:string; name:string; price_cents:number; duration_minutes:number };
-type Professional = { id:string; name:string };
+type Professional = { id:string; name:string; photo_url?:string|null };
 type Plan = { id:string; name:string; price_cents:number; benefit_type:string; allowed_weekdays:number[] };
 type Appointment = { id:string; service_id:string; professional_id:string; starts_at:string; ends_at:string; status:string; payment_mode:string; services:{name:string;price_cents:number;duration_minutes:number}|null; professionals:{name:string}|null };
 type Profile = {full_name:string;phone:string|null;booking_blocked_until:string|null;role:string};
-type Membership = {active:boolean;starts_on:string;ends_on:string|null;plans:Plan|null};
+type Membership = {active:boolean;starts_on:string;ends_on:string;plans:Plan|null};
 type Props = { profile:Profile|null; accountEmail:string; services:Service[]; professionals:Professional[]; appointments:Appointment[]; membership:Membership|null; plans:Plan[] };
 type DayOption = { value:string; week:string; day:string; month:string; closed:boolean; today:boolean };
 
@@ -23,35 +23,17 @@ const planDate = (v:string) => new Intl.DateTimeFormat("pt-BR",{day:"2-digit",mo
 
 function planBenefit(type:string){return type==="beard"?"Barba incluída":type==="cut_beard"?"Corte + barba incluídos":"Cortes incluídos";}
 function planDays(days:number[]){const names:Record<number,string>={0:"domingo",1:"segunda",2:"terça",3:"quarta",4:"quinta",5:"sexta",6:"sábado"};if(days.length===5&&[2,3,4,5,6].every(day=>days.includes(day)))return "Terça a sábado";return days.map(day=>names[day]).filter(Boolean).join(" e ");}
-function membershipDue(membership:Membership){
-  if(membership.ends_on)return membership.ends_on;
-  const [startYear,startMonth,startDay]=membership.starts_on.split("-").map(Number);
-  let year=startYear,month=startMonth;
-  for(let cycle=0;cycle<120;cycle++){
-    month+=1;if(month>12){month=1;year+=1;}
-    const lastDay=new Date(Date.UTC(year,month,0)).getUTCDate();
-    const due=`${year}-${String(month).padStart(2,"0")}-${String(Math.min(startDay,lastDay)).padStart(2,"0")}`;
-    if(new Date(`${due}T23:59:59-03:00`)>new Date())return due;
-  }
-  return membership.starts_on;
-}
-
 function daysUntilRenewal(value:string){
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Sao_Paulo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
   const toUtc=(date:string)=>{const [year,month,day]=date.split("-").map(Number);return Date.UTC(year,month-1,day);};
   return Math.max(0,Math.round((toUtc(value)-toUtc(today))/86400000));
 }
 
-function barberPhotoPath(name:string) {
-  const slug=name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
-  return `/barbeiros/${slug}.png`;
-}
-
-function ProfessionalPortrait({name,index}:{name:string;index:number}) {
+function ProfessionalPortrait({name,photoUrl,index}:{name:string;photoUrl?:string|null;index:number}) {
   const [photoFailed,setPhotoFailed]=useState(false);
   const initials=name.split(" ").map(part=>part[0]).slice(0,2).join("");
   return <span className="professional-photo">
-    {!photoFailed&&<Image src={barberPhotoPath(name)} alt={`Foto de ${name}`} fill sizes="(max-width: 850px) 72vw, 240px" onError={()=>setPhotoFailed(true)}/>}
+    {!photoFailed&&photoUrl&&<Image src={photoUrl} alt={`Foto de ${name}`} fill sizes="(max-width: 850px) 72vw, 240px" onError={()=>setPhotoFailed(true)}/>}
     <span className="professional-fallback" aria-hidden={photoFailed?undefined:true}><b>{initials}</b><small>NEEMIAS PRIME</small></span>
     <i>0{index+1}</i>
   </span>;
@@ -104,7 +86,8 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
   function showPlans(){setActiveSection("plans");pushClientHash("#plano");setView("plans");window.scrollTo({top:0,behavior:"auto"});}
   function showHome(section="inicio"){if(section==="plano"){showPlans();return;}if(section==="perfil"){showProfile();return;}if(section==="meus-agendamentos"){showAppointments();return;}setActiveSection(section==="agendar"?"booking":"home");setView("home");pushClientHash(`#${section}`);window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({behavior:"smooth",block:"start"})));}
   function navigateClient(section:ClientSection){if(section==="appointments")showAppointments();else if(section==="plans")showPlans();else if(section==="profile")showProfile();else showHome(section==="booking"?"agendar":"inicio");}
-  function advanceBooking(stage:number){setBookingStage(stage);window.setTimeout(()=>document.querySelector(".booking-builder")?.scrollIntoView({behavior:"smooth",block:"start"}),80);}
+  function navigateBookingStage(stage:number){setBookingStage(stage);window.setTimeout(()=>document.querySelector(`[data-booking-stage="${stage}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),80);}
+  function advanceBooking(stage:number){navigateBookingStage(stage);}
   function chooseService(id:string){setService(id);setSlot("");advanceBooking(2);}
   function chooseProfessional(id:string){setProfessional(id);setSlot("");advanceBooking(3);}
   function chooseDate(value:string){setDate(value);setSlot("");advanceBooking(4);}
@@ -125,15 +108,15 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
 
         <section className="booking-builder" id="agendar"><header className="booking-head"><div><p className="metal-kicker">AGENDAMENTO ONLINE</p><h2>Escolha. Toque. Pronto.</h2><p>Mostramos apenas horários realmente disponíveis.</p></div><span><b>30</b> min<br/>entre horários</span></header>
           {blocked?<p className="empty-state">Você poderá voltar a agendar após o fim do bloqueio informado acima.</p>:<div className="booking-flow">
-            <nav className="booking-progress" aria-label="Etapas do agendamento">{[[1,"Serviço"],[2,"Barbeiro"],[3,"Dia"],[4,"Horário"]].map(([stage,label])=><button type="button" key={stage} className={`${bookingStage===stage?"active":""} ${bookingStage>Number(stage)?"complete":""}`} onClick={()=>setBookingStage(Number(stage))}><b>{bookingStage>Number(stage)?"✓":String(stage).padStart(2,"0")}</b><span>{label}</span></button>)}</nav>
-            <section className={`booking-step service-step ${bookingStage===1?"stage-active":""}`}><header><b>01</b><div><h3>O que vamos fazer?</h3><p>Toque no serviço desejado</p></div></header><div className="service-catalog">{services.map((item,index)=><button type="button" key={item.id} className={service===item.id?"selected":""} onClick={()=>chooseService(item.id)}><span className="service-symbol">{item.name.includes("Barba")?"B":item.name.includes("Corte")?"C":item.name.includes("pele")?"P":"✦"}</span><span className="service-name"><strong>{item.name}</strong><small>{Math.max(30,item.duration_minutes)} min</small></span><b>{money(item.price_cents)}</b><i>{service===item.id?"✓":String(index+1).padStart(2,"0")}</i></button>)}{!services.length&&<div className="booking-empty-choice"><Image src="/logo-neemias-prime.png" alt="" width={40} height={40}/><div><strong>Catálogo em atualização</strong><span>Os serviços voltarão a aparecer assim que a equipe concluir os ajustes.</span></div></div>}</div>{selected&&<div className="service-detail"><span><small>ESCOLHIDO</small><b>{selected.name}</b></span><i/><span><small>VALOR</small><b>{money(selected.price_cents)}</b></span><em>{membership?"Plano aplicado automaticamente quando houver cobertura":"Pagamento somente na barbearia"}</em></div>}</section>
-            <section className={`booking-step professional-step ${bookingStage===2?"stage-active":""}`}><header><b>02</b><div><h3>Escolha quem cuida do seu estilo</h3><p>Selecione seu barbeiro favorito</p></div></header><div className="professional-picker">{professionals.map((item,index)=><button type="button" className={professional===item.id?"selected":""} onClick={()=>chooseProfessional(item.id)} key={item.id} aria-pressed={professional===item.id}><ProfessionalPortrait name={item.name} index={index}/><span className="professional-info"><small><i/> DISPONÍVEL</small><strong>{item.name}</strong><em>{professional===item.id?"Selecionado para o atendimento":"Escolher profissional"}</em></span><span className="professional-check">✓</span></button>)}{!professionals.length&&<div className="booking-empty-choice"><Image src="/logo-neemias-prime.png" alt="" width={40} height={40}/><div><strong>Equipe indisponível agora</strong><span>Fale com a barbearia para consultar um horário.</span></div></div>}</div><p className="photo-hint">Cada profissional tem sua própria agenda. Ao escolher, mostramos somente os horários realmente livres.</p></section>
-            <section className={`booking-step date-step ${bookingStage===3?"stage-active":""}`}><header><b>03</b><div><h3>Qual o melhor dia?</h3><p>Próximos 7 dias</p></div></header><div className="seven-days">{days.map(item=><button type="button" key={item.value} disabled={item.closed} className={`${date===item.value?"selected":""} ${item.today?"today":""}`} onClick={()=>chooseDate(item.value)}><small>{item.week}</small><strong>{item.day}</strong><span>{item.closed?"Fechado":item.month}</span></button>)}</div></section>
-            <section className={`booking-step slot-step ${bookingStage===4?"stage-active":""}`}><header><b>04</b><div><h3>Escolha o horário</h3><p>{selectedDay?`${selectedDay.week}, ${selectedDay.day} de ${selectedDay.month}`:"Selecione um dia"}</p></div></header>{loading?<div className="slots-loading"><i/><span>Consultando a agenda...</span></div>:slots.length?<div className="slot-groups">{([["Manhã",morning],["Tarde",afternoon],["Noite",evening]] as [string,string[]][]).map(([label,items])=>items.length?<div key={label}><small>{label}</small><div>{items.map(item=><button type="button" className={slot===item?"selected":""} onClick={()=>setSlot(item)} key={item}>{time(item)}{slot===item&&<i>✓</i>}</button>)}</div></div>:null)}</div>:<div className="no-slots"><b>Agenda preenchida neste dia</b><span>Escolha outro dia acima para ver novos horários.</span></div>}</section>
+            <nav className="booking-progress" aria-label="Etapas do agendamento">{[[1,"Serviço"],[2,"Barbeiro"],[3,"Dia"],[4,"Horário"]].map(([stage,label])=><button type="button" key={stage} aria-current={bookingStage===stage?"step":undefined} className={`${bookingStage===stage?"active":""} ${bookingStage>Number(stage)?"complete":""}`} onClick={()=>navigateBookingStage(Number(stage))}><b>{bookingStage>Number(stage)?"✓":String(stage).padStart(2,"0")}</b><span>{label}</span></button>)}</nav>
+            <section data-booking-stage="1" className={`booking-step service-step ${bookingStage===1?"stage-active":""}`}><header><b>01</b><div><h3>O que vamos fazer?</h3><p>Toque no serviço desejado</p></div></header><div className="service-catalog">{services.map((item,index)=><button type="button" key={item.id} className={service===item.id?"selected":""} onClick={()=>chooseService(item.id)}><span className="service-symbol">{item.name.includes("Barba")?"B":item.name.includes("Corte")?"C":item.name.includes("pele")?"P":"✦"}</span><span className="service-name"><strong>{item.name}</strong><small>{Math.max(30,item.duration_minutes)} min</small></span><b>{money(item.price_cents)}</b><i>{service===item.id?"✓":String(index+1).padStart(2,"0")}</i></button>)}{!services.length&&<div className="booking-empty-choice"><Image src="/logo-neemias-prime.png" alt="" width={40} height={40}/><div><strong>Catálogo em atualização</strong><span>Os serviços voltarão a aparecer assim que a equipe concluir os ajustes.</span></div></div>}</div>{selected&&<div className="service-detail"><span><small>ESCOLHIDO</small><b>{selected.name}</b></span><i/><span><small>VALOR</small><b>{money(selected.price_cents)}</b></span><em>{membership?"Plano aplicado automaticamente quando houver cobertura":"Pagamento somente na barbearia"}</em></div>}</section>
+            <section data-booking-stage="2" className={`booking-step professional-step ${bookingStage===2?"stage-active":""}`}><header><b>02</b><div><h3>Escolha quem cuida do seu estilo</h3><p>Selecione seu barbeiro favorito</p></div></header><div className="professional-picker">{professionals.map((item,index)=><button type="button" className={professional===item.id?"selected":""} onClick={()=>chooseProfessional(item.id)} key={item.id} aria-pressed={professional===item.id}><ProfessionalPortrait name={item.name} photoUrl={item.photo_url} index={index}/><span className="professional-info"><small><i/> DISPONÍVEL</small><strong>{item.name}</strong><em>{professional===item.id?"Selecionado para o atendimento":"Escolher profissional"}</em></span><span className="professional-check">✓</span></button>)}{!professionals.length&&<div className="booking-empty-choice"><Image src="/logo-neemias-prime.png" alt="" width={40} height={40}/><div><strong>Equipe indisponível agora</strong><span>Fale com a barbearia para consultar um horário.</span></div></div>}</div><p className="photo-hint">Cada profissional tem sua própria agenda. Ao escolher, mostramos somente os horários realmente livres.</p></section>
+            <section data-booking-stage="3" className={`booking-step date-step ${bookingStage===3?"stage-active":""}`}><header><b>03</b><div><h3>Qual o melhor dia?</h3><p>Próximos 7 dias</p></div></header><div className="seven-days">{days.map(item=><button type="button" key={item.value} disabled={item.closed} className={`${date===item.value?"selected":""} ${item.today?"today":""}`} onClick={()=>chooseDate(item.value)}><small>{item.week}</small><strong>{item.day}</strong><span>{item.closed?"Fechado":item.month}</span></button>)}</div></section>
+            <section data-booking-stage="4" className={`booking-step slot-step ${bookingStage===4?"stage-active":""}`}><header><b>04</b><div><h3>Escolha o horário</h3><p>{selectedDay?`${selectedDay.week}, ${selectedDay.day} de ${selectedDay.month}`:"Selecione um dia"}</p></div></header>{loading?<div className="slots-loading"><i/><span>Consultando a agenda...</span></div>:slots.length?<div className="slot-groups">{([["Manhã",morning],["Tarde",afternoon],["Noite",evening]] as [string,string[]][]).map(([label,items])=>items.length?<div key={label}><small>{label}</small><div>{items.map(item=><button type="button" className={slot===item?"selected":""} onClick={()=>setSlot(item)} key={item}>{time(item)}{slot===item&&<i>✓</i>}</button>)}</div></div>:null)}</div>:<div className="no-slots"><b>Agenda preenchida neste dia</b><span>Escolha outro dia acima para ver novos horários.</span></div>}</section>
             <section className={`booking-summary ${slot?"ready":""}`}><div className="summary-icon">✦</div><div><small>SEU AGENDAMENTO</small><strong>{selected?.name||"Escolha um serviço"}</strong><span>{slot?`${selectedProfessional?.name} · ${selectedDay?.week}, ${selectedDay?.day}/${selectedDay?.month} às ${time(slot)}`:"Escolha um horário para continuar"}</span></div><div className="summary-price"><small>VALOR</small><b>{selected?money(selected.price_cents):"—"}</b></div><button disabled={!slot||loading} onClick={book}>{loading?"AGUARDE...":"CONFIRMAR HORÁRIO"}<span>→</span></button></section>
           </div>}{feedback&&<div className="inline-feedback" role="status" aria-live="polite">{feedback}<button type="button" aria-label="Fechar aviso" onClick={()=>setFeedback("")}>×</button></div>}</section>
 
-        <section id="plano" className="membership-card"><div><p className="metal-kicker">MEU CLUBE</p><h2>{membership?.plans?.name||"Mais frequência. Mais presença."}</h2><p>{membership?`Plano ativo até ${planDate(membershipDue(membership))}.`:"Compare os planos disponíveis e fale com a barbearia pelo WhatsApp."}</p></div>{membership?<button type="button" onClick={showPlans}>VER MEU PLANO →</button>:<button type="button" onClick={showPlans}>CONHECER PLANOS →</button>}</section>
+        <section id="plano" className="membership-card"><div><p className="metal-kicker">MEU CLUBE</p><h2>{membership?.plans?.name||"Mais frequência. Mais presença."}</h2><p>{membership?`Plano ativo até ${planDate(membership.ends_on)}.` :"Compare os planos disponíveis e fale com a barbearia pelo WhatsApp."}</p></div>{membership?<button type="button" onClick={showPlans}>VER MEU PLANO →</button>:<button type="button" onClick={showPlans}>CONHECER PLANOS →</button>}</section>
         <button type="button" onClick={showAppointments} className="appointments-shortcut"><span>◷</span><div><small>SEUS HORÁRIOS EM UM SÓ LUGAR</small><strong>Ver meus agendamentos</strong><p>Acompanhe, cancele ou reagende seus atendimentos.</p></div><i>→</i></button>
       </div>
     </section>
@@ -145,7 +128,7 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
 function PlansPanel({profile,membership,plans,onNavigate}:{profile:Profile|null;membership:Membership|null;plans:Plan[];onNavigate:(section:ClientSection)=>void}) {
   const firstName=profile?.full_name?.split(" ")[0]||"cliente";
   const whatsapp=(plan:Plan)=>`https://wa.me/5521959438832?text=${encodeURIComponent(`Olá! Sou ${profile?.full_name||"cliente"} e quero saber mais sobre o plano ${plan.name}.`)}`;
-  const renewalDate=membership?membershipDue(membership):null;
+  const renewalDate=membership?.ends_on||null;
   const renewalDays=renewalDate?daysUntilRenewal(renewalDate):0;
   return <main className={`${styles.root} portal-shell`}>
     <ClientSidebar active="plans" profileName={profile?.full_name||"Cliente Prime"} isAdmin={profile?.role==="admin"} onNavigate={onNavigate}/>

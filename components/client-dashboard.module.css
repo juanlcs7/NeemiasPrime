@@ -411,4 +411,111 @@
   .root :global(.renewal-countdown>div>strong){font-size:70px!important}
 }
 
-@media(prefers-reduced-motion:reduce){.root :global(.portal-content),.root :global(.plans-page),.root :global(.profile-page),.root :global(.appointments-content){animation:none}.root :global(*){scroll-behavior:auto!important;transition-duration:.01ms!important}}
+/* Agenda Prime 2.0 — atmosfera, profundidade e resposta visual */
+.root{--prime-citrus:#c9ff58;--prime-amber:#dda66f;--prime-cream:#f3eadc;--prime-teal:#235e53;--prime-night:#09100f;background:#09100f;color:#eef3ef}
+.root :global(.portal-main){position:relative;min-height:100svh;overflow:hidden;background:radial-gradient(circle at 88% 5%,#235a4c75 0,transparent 29rem),radial-gradient(circle at 7% 28%,#9a64301c 0,transparent 24rem),linear-gradient(145deg,#0a1110 0%,#101b19 48%,#0b1211 100%);color:#edf2ee}
+.root :global(.portal-main:before){content:"";position:absolute;z-index:0;inset:0;opacity:.22;pointer-events:none;background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px);background-size:56px 56px;mask-image:linear-gradient(to bottom,#000,transparent 68%)}
+.root :global(.portal-content){position:relative;z-index:1}
+.root :global(.portal-welcome){min-height:138px;margin-bottom:20px;padding:27px 31px;border:1px solid #ffffff12;border-radius:20px;background:linear-gradient(115deg,#ffffff0a,#ffffff03);box-shadow:inset 0 1px #ffffff0b,0 22px 65px #0003;backdrop-filter:blur(14px)}
+.root :global(.portal-welcome h1){color:var(--prime-cream);text-shadow:0 12px 35px #0006}
+.root :global(.portal-welcome h1 em){color:var(--prime-amber)}
+.root :global(.portal-welcome p:last-child){color:#9caaa3}
+.root :global(.portal-welcome .metal-kicker){color:var(--prime-amber)}
+.root :global(.member-seal){border-color:#dda66f55;background:#dda66f0d;color:#bca58e;box-shadow:inset 0 0 28px #dda66f0a}
+.root :global(.member-seal b){color:var(--prime-cream)}
+.root :global(.next-booking){min-height:295px;border-color:#dda66f31;background:radial-gradient(circle at 88% 10%,#386b5d 0,transparent 29%),radial-gradient(circle at 18% 110%,#9b623946 0,transparent 35%),linear-gradient(120deg,#0b1513,#142720 58%,#101b18);box-shadow:0 38px 100px #0007,inset 0 1px #ffffff16}
+.root :global(.next-booking:before){background:linear-gradient(112deg,transparent 0 56%,#dda66f12 56.2%,transparent 56.5%)}
+.root :global(.next-booking .metal-kicker){color:var(--prime-amber)}
+.root :global(.next-copy h2){color:var(--prime-cream);letter-spacing:-1.8px}
+.root :global(.choose-time-link){color:var(--prime-citrus)}
+.root :global(.booking-builder){--book-line:#ffffff14;overflow:hidden;border-color:#dda66f32;border-radius:24px;background:#09100f;box-shadow:0 45px 120px #0008,0 0 0 1px #ffffff06,inset 0 1px #ffffff12}
+.root :global(.booking-builder:after){opacity:.13;background-image:linear-gradient(120deg,transparent 0 54%,#dda66f0c 54.2%,transparent 54.5%),repeating-linear-gradient(120deg,transparent 0 27px,#ffffff04 27px 28px)}
+.root :global(.booking-head){min-height:230px;background:radial-gradient(circle at 82% 15%,#347665 0,transparent 31%),radial-gradient(circle at 0 100%,#7f51352b 0,transparent 35%),linear-gradient(125deg,#07100e,#12221d 60%,#0d1815)}
+.root :global(.booking-head .metal-kicker){color:var(--prime-amber)}
+.root :global(.booking-head h2){color:var(--prime-cream);text-shadow:0 15px 38px #0006}
+.root :global(.booking-head>span){border-color:#dda66f61;background:#dda66f0a;color:#b9aca0;box-shadow:inset 0 0 35px #dda66f0d,0 16px 45px #0005;animation:bookingSealFloat 4.8s ease-in-out infinite}
+.root :global(.booking-head>span b){color:var(--prime-amber)}
+.root :global(.booking-progress){border-bottom-color:#ffffff12;background:linear-gradient(90deg,#08100ef7,#101c19f7);box-shadow:0 16px 40px #0004}
+.root :global(.booking-progress button:not(:last-child):after){background:linear-gradient(90deg,#dda66f3b,#ffffff0d)}
+.root :global(.booking-progress button b){border-color:#ffffff1b;background:#101a17}
+.root :global(.booking-progress button span){background:#0c1513}
+.root :global(.booking-progress button.active){color:var(--prime-cream)}
+.root :global(.booking-progress button.active b){border-color:var(--prime-amber);background:var(--prime-amber);color:#17120d;box-shadow:0 0 30px #dda66f3e}
+.root :global(.booking-progress button.complete b){border-color:#7c9f6d;background:#183126;color:var(--prime-citrus)}
+.root :global(.booking-step),.root :global(.booking-step.stage-active){background:radial-gradient(circle at 100% 0,#21453b35 0,transparent 27rem),linear-gradient(125deg,#0b1311,#101b18 64%,#0b1412)}
+.root :global(.booking-step>header>b){border-color:#dda66f4d;background:#dda66f12;color:var(--prime-amber);box-shadow:inset 0 0 20px #dda66f0d}
+.root :global(.booking-step>header h3){color:var(--prime-cream)}
+.root :global(.booking-step>header p){color:#83928a}
+.root :global(.booking-builder .service-catalog button){border-color:#ffffff13;background:linear-gradient(135deg,#14211e,#0f1917);box-shadow:0 14px 34px #0002,inset 0 1px #ffffff06}
+.root :global(.booking-builder .service-catalog button:hover){border-color:#dda66f65;background:linear-gradient(135deg,#1a2a26,#12201c);box-shadow:0 18px 40px #0004}
+.root :global(.booking-builder .service-catalog .service-symbol){border-color:#dda66f2e;background:#dda66f0b;color:#d9b995}
+.root :global(.booking-builder .service-catalog button.selected){border-color:#c9ff5875;background:linear-gradient(120deg,#20362d,#13211d);box-shadow:inset 3px 0 var(--prime-citrus),0 18px 44px #0005}
+.root :global(.booking-builder .service-catalog button.selected .service-symbol){border-color:var(--prime-citrus);background:var(--prime-citrus);color:#11180e}
+.root :global(.service-detail){border-color:#dda66f28;background:linear-gradient(100deg,#111b18,#181b16);box-shadow:inset 3px 0 var(--prime-amber)}
+.root :global(.professional-picker button){border-color:#ffffff16;background:linear-gradient(160deg,#14211e,#0c1412);box-shadow:0 24px 55px #0005}
+.root :global(.professional-picker button:hover){border-color:#dda66f6b;box-shadow:0 28px 60px #0007}
+.root :global(.professional-photo:after){background:linear-gradient(180deg,transparent 35%,#0b1311 100%)}
+.root :global(.professional-info small i){background:var(--prime-amber);box-shadow:0 0 11px #dda66f}
+.root :global(.professional-picker button.selected){border-color:var(--prime-citrus);background:#15241f;box-shadow:0 0 0 1px #c9ff582b,0 28px 65px #0008}
+.root :global(.professional-picker button.selected .professional-check){border-color:var(--prime-citrus);background:var(--prime-citrus);box-shadow:0 0 23px #c9ff5840}
+.root :global(.professional-picker button.selected .professional-info em){color:var(--prime-citrus)}
+.root :global(.seven-days button){border-color:#ffffff15;background:linear-gradient(155deg,#15211e,#0e1715);box-shadow:0 14px 35px #0003}
+.root :global(.seven-days button:hover:not(:disabled)){border-color:#dda66f6b;transform:translateY(-3px)}
+.root :global(.seven-days button.today:not(.selected)){border-color:#dda66f73;box-shadow:inset 0 0 0 1px #dda66f16}
+.root :global(.seven-days button.selected){border-color:var(--prime-amber);background:linear-gradient(145deg,#f0c493,#d89a60);color:#18120c;box-shadow:0 16px 36px #0005,0 0 28px #dda66f1f}
+.root :global(.seven-days button.selected small),.root :global(.seven-days button.selected span){color:#624323}
+.root :global(.slot-groups>div>small){color:#bca58e}
+.root :global(.slot-groups button){border-color:#ffffff16;background:linear-gradient(145deg,#14201d,#0e1715);color:#e7ece8;box-shadow:0 10px 28px #0003}
+.root :global(.slot-groups button:hover){border-color:#dda66f;transform:translateY(-3px)}
+.root :global(.slot-groups button.selected){border-color:var(--prime-citrus);background:var(--prime-citrus);color:#11180e;box-shadow:0 12px 32px #0005,0 0 25px #c9ff5828}
+.root :global(.slots-loading),.root :global(.no-slots){border-color:#dda66f20;background:#101916;color:#89978f}
+.root :global(.slots-loading i){border-color:#ffffff20;border-top-color:var(--prime-amber)}
+.root :global(.booking-summary){border-top-color:#dda66f32;background:linear-gradient(110deg,#0a1210,#121c18)}
+.root :global(.booking-summary.ready){background:radial-gradient(circle at 10% 0,#305e50,#111c18 44%,#0a110f);box-shadow:inset 0 1px #ffffff0c}
+.root :global(.booking-summary.ready .summary-icon),.root :global(.booking-summary.ready>button){background:var(--prime-citrus)}
+.root :global(.booking-summary.ready>button){animation:bookingReadyPulse 2.6s ease-in-out infinite}
+.root :global(.membership-card){border:1px solid #dda66f28;background:radial-gradient(circle at 88% 0,#6a493023,transparent 36%),linear-gradient(120deg,#111b18,#18241f);box-shadow:0 24px 60px #0004}
+.root :global(.appointments-shortcut){border:1px solid #ffffff12;background:linear-gradient(120deg,#121d1a,#0e1715);color:#edf2ee;box-shadow:0 22px 55px #0004}
+.root :global(.appointments-shortcut:hover){border-color:#dda66f40;box-shadow:0 28px 65px #0006}
+.root :global(.appointments-shortcut>span){background:#dda66f17;color:var(--prime-amber)}
+.root :global(.appointments-shortcut p),.root :global(.appointments-shortcut small){color:#839189}
+.root :global(.appointments-shortcut>i){color:var(--prime-amber)}
+.root :global(.inline-feedback){border:1px solid #dda66f30;background:#251d15;color:#f2d7ba;box-shadow:0 18px 45px #0005}
+@keyframes bookingSealFloat{0%,100%{transform:rotate(5deg) translateY(0)}50%{transform:rotate(2deg) translateY(-7px)}}
+@keyframes bookingReadyPulse{0%,100%{box-shadow:0 0 0 #c9ff5800}50%{box-shadow:0 0 32px #c9ff5835}}
+
+@media(min-width:1050px){
+  .root :global(.portal-content){width:min(1280px,92%);padding-top:34px}
+  .root :global(.booking-builder .service-catalog){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .root :global(.date-step),.root :global(.slot-step){min-height:490px}
+}
+@media(max-width:850px){
+  .root{padding-bottom:92px;background:#09100f}
+  .root :global(.portal-main){background:radial-gradient(circle at 100% 0,#235a4c5c 0,transparent 22rem),linear-gradient(160deg,#09100f,#101a18 55%,#0b1311)}
+  .root :global(.portal-main:before){background-size:38px 38px;opacity:.17}
+  .root :global(.portal-content){padding:17px 13px 26px}
+  .root :global(.portal-welcome){min-height:126px;margin-bottom:13px;padding:22px 20px;border-radius:17px}
+  .root :global(.portal-welcome h1){font-size:38px}
+  .root :global(.next-booking){min-height:270px;padding:29px 23px;border-radius:18px}
+  .root :global(.empty-booking .next-copy h2){max-width:260px;font-size:35px}
+  .root :global(.booking-builder){margin-left:-13px;margin-right:-13px;border-radius:0;border-inline:0}
+  .root :global(.booking-head){min-height:190px;padding:33px 21px;background:radial-gradient(circle at 100% 0,#347665 0,transparent 43%),radial-gradient(circle at 0 100%,#8b593735 0,transparent 38%),#0a1210}
+  .root :global(.booking-head h2){font-size:39px}
+  .root :global(.booking-progress){top:64px;padding:0 10px;background:#0a1311f5}
+  .root :global(.booking-progress button span){background:transparent}
+  .root :global(.booking-step){min-height:540px;padding:29px 17px 128px}
+  .root :global(.booking-step>header>b){flex:none}
+  .root :global(.booking-builder .service-catalog){max-height:390px}
+  .root :global(.professional-picker button){width:78vw;min-width:78vw;max-width:330px}
+  .root :global(.seven-days button){min-width:84px}
+  .root :global(.slot-groups>div>div){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .root :global(.booking-summary){bottom:77px;padding:15px 15px calc(15px + env(safe-area-inset-bottom));background:#0a1210ed;backdrop-filter:blur(18px)}
+  .root :global(.membership-card),.root :global(.appointments-shortcut){border-radius:17px}
+}
+@media(max-width:390px){
+  .root :global(.portal-welcome h1){font-size:34px}
+  .root :global(.booking-head h2){font-size:34px}
+  .root :global(.slot-groups>div>div){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(prefers-reduced-motion:reduce){.root :global(.portal-content),.root :global(.plans-page),.root :global(.profile-page),.root :global(.appointments-content){animation:none}.root :global(*){scroll-behavior:auto!important;transition-duration:.01ms!important}.root :global(.booking-head>span),.root :global(.booking-summary.ready>button){animation:none}}
