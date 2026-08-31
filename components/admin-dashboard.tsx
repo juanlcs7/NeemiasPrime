@@ -17,6 +17,8 @@ const initials = (name = "Cliente") => name.split(" ").filter(Boolean).slice(0, 
 const whatsapp = (phone = "") => { const digits=phone.replace(/\D/g, ""); return `https://wa.me/${digits.startsWith("55")?digits:`55${digits}`}`; };
 const statusLabel: Record<string, string> = { scheduled: "Agendado", confirmed: "Confirmado", completed: "Concluído", cancelled: "Cancelado", no_show: "Não compareceu" };
 const statusTone: Record<string, string> = { scheduled: "blue", confirmed: "green", completed: "neutral", cancelled: "red", no_show: "orange" };
+const DEFAULT_CLIENT_PASSWORD="Clienteprime123";
+function saoPauloIso(value:string){const date=new Date(`${value}:00-03:00`);if(!Number.isFinite(date.getTime()))throw new Error("Data e horário inválidos.");return date.toISOString();}
 function planState(membership: Item) {
   const today=dateKey(new Date());
   if(!membership?.active)return "Encerrado";
@@ -151,6 +153,28 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
     notify("Plano renovado para um novo ciclo mensal.");
   }
 
+  async function setClientPassword(client:Item){
+    const password=window.prompt(`Nova senha para ${client.full_name}:`,DEFAULT_CLIENT_PASSWORD);
+    if(password===null)return;
+    setBusy(client.id+"password");
+    let error:Error|null=null;try{await adminAction({action:"client_password",clientId:client.id,password});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
+    setBusy("");
+    if(error)return notify(`Erro ao definir senha: ${error.message}`);
+    notify("Senha do cliente atualizada. Oriente a troca após o primeiro acesso.");
+  }
+
+  async function createWalkIn(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();const formElement=event.currentTarget;const form=new FormData(formElement);setBusy("walk-in");
+    let result:any=null;let error:Error|null=null;try{result=await adminAction({action:"walk_in_create",clientId:String(form.get("clientId")),professionalId:String(form.get("professionalId")),serviceId:String(form.get("serviceId")),startsAt:saoPauloIso(String(form.get("startsAt")))});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
+    setBusy("");if(error)return notify(`Erro no encaixe: ${error.message}`);if(result?.appointment)setAppointments((rows)=>[result.appointment,...rows]);formElement.reset();notify(`Encaixe criado com sucesso${result?.appointmentId?".":""}`);
+  }
+
+  async function blockSlots(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();const formElement=event.currentTarget;const form=new FormData(formElement);setBusy("time-block");
+    let result:any=null;let error:Error|null=null;try{result=await adminAction({action:"time_block_create",professionalId:String(form.get("professionalId")),startsAt:saoPauloIso(String(form.get("startsAt"))),durationMinutes:Number(form.get("durationMinutes")),occurrences:Number(form.get("occurrences"))});}catch(cause){error=cause instanceof Error?cause:new Error("Falha desconhecida.");}
+    setBusy("");if(error)return notify(`Erro ao fechar horário: ${error.message}`);formElement.reset();notify(`${result?.created||1} horário${Number(result?.created||1)===1?"":"s"} fechado${Number(result?.created||1)===1?"":"s"} com sucesso.`);
+  }
+
   function openAgenda(filter = "today") { setDateFilter(filter); setStatusFilter("all"); setProFilter("all"); setTab("agenda"); }
 
   return <div className={styles.root}>
@@ -166,8 +190,8 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
     <main className={styles.main}>
       {feedback && <div className={styles.toast} role="status" aria-live="polite"><span><Image src="/logo-neemias-prime.png" alt="" width={22} height={22}/></span>{feedback}</div>}
       {tab === "overview" && <Overview adminName={adminName} todayAppointments={todayAppointments} activeToday={activeToday} nextAppointment={nextAppointment} todayRevenue={todayRevenue} todayMembers={todayMembers} professionals={pros} openAgenda={openAgenda} setTab={setTab}/>} 
-      {tab === "agenda" && <Agenda appointments={appointmentView} search={appointmentSearch} setSearch={setAppointmentSearch} dateFilter={dateFilter} setDateFilter={setDateFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} proFilter={proFilter} setProFilter={setProFilter} professionals={pros} busy={busy} changeStatus={changeStatus} clock={clock}/>} 
-      {tab === "clientes" && <Clients clients={clientView} allClients={clients} plans={plans} memberships={membershipByClient} search={clientSearch} setSearch={setClientSearch} filter={clientFilter} setFilter={setClientFilter} busy={busy} assignPlan={assignPlan} renewPlan={renewPlan}/>}
+      {tab === "agenda" && <Agenda appointments={appointmentView} search={appointmentSearch} setSearch={setAppointmentSearch} dateFilter={dateFilter} setDateFilter={setDateFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} proFilter={proFilter} setProFilter={setProFilter} professionals={pros} services={services} clients={clients} busy={busy} changeStatus={changeStatus} createWalkIn={createWalkIn} blockSlots={blockSlots} clock={clock}/>}
+      {tab === "clientes" && <Clients clients={clientView} allClients={clients} plans={plans} memberships={membershipByClient} search={clientSearch} setSearch={setClientSearch} filter={clientFilter} setFilter={setClientFilter} busy={busy} assignPlan={assignPlan} renewPlan={renewPlan} setClientPassword={setClientPassword}/>}
       {tab === "servicos" && <Services services={serviceView} total={services.length} search={serviceSearch} setSearch={setServiceSearch} filter={serviceFilter} setFilter={setServiceFilter} busy={busy} saveService={saveService}/>} 
       {tab === "equipe" && <Team professionals={pros} appointments={appointments} busy={busy} toggleProfessional={toggleProfessional} openAgenda={openAgenda}/>} 
     </main>
@@ -205,8 +229,9 @@ function Overview({ adminName, todayAppointments, activeToday, nextAppointment, 
   </>;
 }
 
-function Agenda({ appointments, search, setSearch, dateFilter, setDateFilter, statusFilter, setStatusFilter, proFilter, setProFilter, professionals, busy, changeStatus, clock }: any) {
+function Agenda({ appointments, search, setSearch, dateFilter, setDateFilter, statusFilter, setStatusFilter, proFilter, setProFilter, professionals, services, clients, busy, changeStatus, createWalkIn, blockSlots, clock }: any) {
   return <><PageHead eyebrow="ATENDIMENTOS" title="Agenda" text="Encontre horários rapidamente e atualize cada etapa do atendimento."/>
+    <ScheduleTools clients={clients} professionals={professionals} services={services} busy={busy} createWalkIn={createWalkIn} blockSlots={blockSlots}/>
     <section className={styles.filters}>
       <label className={styles.search}><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar cliente, telefone ou serviço"/></label>
       <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)}><option value="today">Hoje</option><option value="tomorrow">Amanhã</option><option value="week">Próximos 7 dias</option><option value="all">Próximos 30 dias</option></select>
@@ -217,6 +242,13 @@ function Agenda({ appointments, search, setSearch, dateFilter, setDateFilter, st
     <section className={styles.appointmentList}>{appointments.map((a: Item) => <AppointmentCard key={a.id} appointment={a} busy={busy} changeStatus={changeStatus} clock={clock}/>)}</section>
     {!appointments.length && <Empty title="Nada por aqui" text="Tente mudar os filtros ou confira outro período."/>}
   </>;
+}
+
+function ScheduleTools({clients,professionals,services,busy,createWalkIn,blockSlots}:any){
+  return <section className={styles.scheduleTools}>
+    <form onSubmit={createWalkIn}><header><span>ENCAIXE</span><h2>Adicionar cliente à agenda</h2><p>Cria um atendimento respeitando expediente, bloqueios e conflitos.</p></header><div><label>Cliente<select name="clientId" required defaultValue=""><option value="" disabled>Escolha o cliente</option>{clients.map((client:Item)=><option key={client.id} value={client.id}>{client.full_name||"Cliente sem nome"}</option>)}</select></label><label>Profissional<select name="professionalId" required defaultValue=""><option value="" disabled>Escolha o profissional</option>{professionals.filter((item:Item)=>item.active).map((item:Item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Serviço<select name="serviceId" required defaultValue=""><option value="" disabled>Escolha o serviço</option>{services.filter((item:Item)=>item.active).map((item:Item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Data e horário<input name="startsAt" type="datetime-local" step="1800" required/></label></div><button disabled={busy==="walk-in"}>{busy==="walk-in"?"Criando encaixe...":"Criar encaixe"}</button></form>
+    <form onSubmit={blockSlots}><header><span>FECHAR HORÁRIO</span><h2>Bloquear disponibilidade</h2><p>Fecha um período único ou repete o bloqueio semanalmente.</p></header><div><label>Profissional<select name="professionalId" required defaultValue=""><option value="" disabled>Escolha o profissional</option>{professionals.map((item:Item)=><option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Início<input name="startsAt" type="datetime-local" step="1800" required/></label><label>Duração<select name="durationMinutes" defaultValue="30"><option value="30">30 minutos</option><option value="60">1 hora</option><option value="90">1h30</option><option value="120">2 horas</option><option value="240">4 horas</option></select></label><label>Recorrência<select name="occurrences" defaultValue="1"><option value="1">Não recorrente</option><option value="4">Semanal · 4 vezes</option><option value="8">Semanal · 8 vezes</option><option value="12">Semanal · 12 vezes</option></select></label></div><button disabled={busy==="time-block"}>{busy==="time-block"?"Fechando horários...":"Fechar horário"}</button></form>
+  </section>;
 }
 
 function AppointmentCard({ appointment: a, busy, changeStatus, clock }: any) {
@@ -236,14 +268,14 @@ function AppointmentCard({ appointment: a, busy, changeStatus, clock }: any) {
   </article>;
 }
 
-function Clients({ clients, allClients, plans, memberships, search, setSearch, filter, setFilter, busy, assignPlan, renewPlan }: any) {
+function Clients({ clients, allClients, plans, memberships, search, setSearch, filter, setFilter, busy, assignPlan, renewPlan, setClientPassword }: any) {
   const blockedCount = allClients.filter((c: Item) => c.booking_blocked_until && new Date(c.booking_blocked_until) > new Date()).length;
   return <><PageHead eyebrow="RELACIONAMENTO" title="Clientes e planos" text="Consulte contatos, identifique bloqueios e gerencie o clube mensal sem sair da tela."/>
     <section className={styles.clientSummary}><div><strong>{allClients.length}</strong><span>clientes cadastrados</span></div><div><strong>{memberships.size}</strong><span>planos ativos</span></div><div><strong>{blockedCount}</strong><span>bloqueados agora</span></div></section>
     <section className={styles.filters}><label className={styles.search}><span>⌕</span><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome ou telefone"/></label><select value={filter} onChange={(e) => setFilter(e.target.value)}><option value="all">Todos os clientes</option><option value="members">Com plano</option><option value="without">Sem plano</option><option value="blocked">Bloqueados</option></select></section>
     <section className={styles.clientGrid}>{clients.map((client: Item) => { const membership = memberships.get(client.id); const blocked = client.booking_blocked_until && new Date(client.booking_blocked_until) > new Date(); return <article className={styles.clientCard} key={client.id}>
       <div className={styles.clientIdentity}><span className={styles.avatar}>{initials(client.full_name)}</span><div><strong>{client.full_name}</strong>{client.phone?<a href={whatsapp(client.phone)} target="_blank" rel="noreferrer">{client.phone}</a>:<small className={styles.noContact}>Sem telefone cadastrado</small>}</div>{blocked && <em>Bloqueado</em>}</div>
-      <div className={styles.planControl}><label>Plano atual</label><select disabled={busy === client.id + "plan"} value={membership?.plan_id || ""} onChange={(e) => assignPlan(client.id, e.target.value)}><option value="">Sem plano</option>{plans.filter((p: Item) => p.active).map((plan: Item) => <option key={plan.id} value={plan.id}>{plan.name} · {money(plan.price_cents)}</option>)}</select>{membership?<><small>{planState(membership)} · até {membership.ends_on}</small><button type="button" disabled={busy===membership.id+"renew"} onClick={()=>renewPlan(membership)}>{busy===membership.id+"renew"?"Renovando...":"Renovar ciclo"}</button></>:<small>Atendimentos cobrados na barbearia</small>}</div>
+      <div className={styles.planControl}><label>Plano atual</label><select disabled={busy === client.id + "plan"} value={membership?.plan_id || ""} onChange={(e) => assignPlan(client.id, e.target.value)}><option value="">Sem plano</option>{plans.filter((p: Item) => p.active).map((plan: Item) => <option key={plan.id} value={plan.id}>{plan.name} · {money(plan.price_cents)}</option>)}</select>{membership?<><small>{planState(membership)} · até {membership.ends_on}</small><button type="button" disabled={busy===membership.id+"renew"} onClick={()=>renewPlan(membership)}>{busy===membership.id+"renew"?"Renovando...":"Renovar ciclo"}</button></>:<small>Atendimentos cobrados na barbearia</small>}<button type="button" className={styles.passwordButton} disabled={busy===client.id+"password"} onClick={()=>setClientPassword(client)}>{busy===client.id+"password"?"Definindo senha...":"Criar ou trocar senha"}</button></div>
     </article>; })}</section>
     {!clients.length && <Empty title="Cliente não encontrado" text="Revise a busca ou selecione outro filtro."/>}
   </>;

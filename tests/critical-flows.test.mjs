@@ -31,10 +31,24 @@ test("migração protege planos expirados, cobertura por ID e histórico", async
 
 test("operações administrativas exigem sessão e cargo de administrador", async () => {
   const route = await read("app/api/admin/action/route.ts");
+  assert.match(route, /import "server-only"/);
   assert.match(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /profile\?\.role !== "admin"/);
-  assert.doesNotMatch(route, /Authorization:`Admin|SUPABASE_SERVICE_ROLE_KEY|SUPABASE_SECRET_KEY/);
+  assert.doesNotMatch(route, /Authorization:`Admin/);
+  assert.match(route, /admin\.auth\.admin\.updateUserById/);
   for (const rpc of ["admin_assign_membership", "admin_renew_membership", "admin_remove_membership", "admin_mark_no_show"]) assert.match(route, new RegExp(`rpc\\("${rpc}"`));
+});
+
+test("encaixes e bloqueios recorrentes validam conflitos dentro do banco", async () => {
+  const sql = await read("supabase/migrations/20260901_admin_scheduling_tools.sql");
+  const route = await read("app/api/admin/action/route.ts");
+  assert.match(sql, /create or replace function public\.admin_create_walk_in/);
+  assert.match(sql, /create or replace function public\.admin_block_slots/);
+  assert.match(sql, /pg_advisory_xact_lock/);
+  assert.match(sql, /p_occurrences not between 1 and 52/);
+  assert.match(sql, /tstzrange\(starts_at,ends_at,'\[\)'\)&&tstzrange\(v_start,v_end,'\[\)'\)/);
+  assert.match(route, /rpc\("admin_create_walk_in"/);
+  assert.match(route, /rpc\("admin_block_slots"/);
 });
 
 test("falta e bloqueio de 24 horas pertencem à mesma operação transacional", async () => {
@@ -68,6 +82,8 @@ test("agendamento oferece etapas navegáveis e layouts próprios para desktop e 
   assert.match(dashboard, /data-booking-stage="1"/);
   assert.match(dashboard, /aria-current=\{bookingStage===stage\?"step"/);
   assert.match(dashboard, /navigateBookingStage/);
+  assert.match(dashboard, /setSuccess\(false\);showAppointments\(\)/);
+  for (const service of ["corte","corte + barba","corte infantil","hidratacao","relaxamento capilar","sobrancelha"]) assert.match(dashboard, new RegExp(service.replace("+", "\\+")));
   assert.match(styles, /@media\(min-width:1050px\)/);
   assert.match(styles, /@media\(max-width:850px\)/);
   assert.match(styles, /prefers-reduced-motion:reduce/);

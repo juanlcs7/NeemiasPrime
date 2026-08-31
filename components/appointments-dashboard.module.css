@@ -25,6 +25,21 @@
   .root :global(.appointments-hero .new-appointment){width:100%;min-width:0}
 }
 @media(max-width:430px){.root :global(.appointments-top>div){display:none}.root :global(.appointments-hero h1){font-size:38px}.root :global(.appointment-list article){grid-template-columns:54px 1fr}.root :global(.appointment-title>span){display:none}.root :global(.appointment-meta b){font-size:8px}.root :global(.appointment-state>div){gap:5px}.root :global(.appointment-state button){padding:0 9px}.root :global(.reschedule-modal>h2){font-size:27px}}
+
+/* Continuidade escura da experiência do cliente */
+.root{min-height:100svh;background:#09100f;color:#edf2ee}
+.root :global(.appointments-main){background:radial-gradient(circle at 95% 0,#245b4d66 0,transparent 28rem),radial-gradient(circle at 4% 55%,#8d5a3222 0,transparent 24rem),linear-gradient(145deg,#09100f,#111c19)}
+.root :global(.appointments-top){border-bottom-color:#ffffff12;background:linear-gradient(90deg,#0a1210f2,#11201cf0);color:#eef3ef;backdrop-filter:blur(18px)}
+.root :global(.appointments-top small){color:#84938b}
+.root :global(.appointments-hero){border-color:#dda66f32;background:radial-gradient(circle at 78% 18%,#347665,#10211c 50%,#09100f);box-shadow:0 35px 90px #0007}
+.root :global(.appointments-hero p){color:#dda66f}.root :global(.appointments-hero h1 em){color:#c9ff58}.root :global(.appointments-hero>a),.root :global(.appointments-hero .new-appointment){background:#c9ff58}
+.root :global(.appointments-tabs){border-bottom-color:#ffffff16}.root :global(.appointments-tabs button){color:#7f8f87}.root :global(.appointments-tabs button.active){color:#f3eadc}.root :global(.appointments-tabs button:after){background:#dda66f}.root :global(.appointments-tabs span){background:#ffffff0c}.root :global(.appointments-tabs button.active span){background:#dda66f;color:#17120d}
+.root :global(.appointment-list article),.root :global(.appointment-list article.featured){border-color:#ffffff13;background:linear-gradient(125deg,#14211e,#0d1715);color:#edf2ee;box-shadow:0 20px 55px #0004}
+.root :global(.appointment-list article.featured){border-color:#c9ff5847;background:radial-gradient(circle at 100% 0,#25483c,#111d19 50%,#0d1715)}
+.root :global(.appointment-date),.root :global(.appointment-state){border-color:#ffffff12}.root :global(.appointment-date small),.root :global(.appointment-date span),.root :global(.appointment-meta small){color:#819087}
+.root :global(.appointment-title>span){background:#dda66f;color:#18120d}.root :global(.appointment-state button){border-color:#ffffff18;color:#aab5af}.root :global(.appointment-state button.reschedule){border-color:#c9ff58;background:#c9ff58;color:#11180e}
+.root :global(.appointments-empty){border-color:#ffffff1b;background:#101917}.root :global(.appointments-empty>span){background:#dda66f;color:#17120d}.root :global(.appointments-empty p){color:#849189}.root :global(.appointments-empty a),.root :global(.appointments-empty>button){color:#c9ff58}
+@media(max-width:900px){.root :global(.appointments-top){background:#0a1311ef}.root :global(.appointments-content){padding-top:18px}.root :global(.appointment-state){border-top-color:#ffffff12}.root :global(.appointments-mobile-nav){border-color:#ffffff17;background:linear-gradient(105deg,#07100ef5,#0c1914f2)}}
 @media(prefers-reduced-motion:reduce){.root *{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
 /* Acabamento final — agendamentos */
@@ -44,3 +59,9 @@
   .root :global(.appointment-list article:hover){transform:none}
 }
 @media(prefers-reduced-motion:reduce){.root :global(.appointments-content){animation:none}}
+
+/* A continuidade escura precisa ficar por último para prevalecer sobre o acabamento legado. */
+.root :global(.appointments-main){background:radial-gradient(circle at 95% 0,#245b4d66 0,transparent 28rem),radial-gradient(circle at 4% 55%,#8d5a3222 0,transparent 24rem),linear-gradient(145deg,#09100f,#111c19)}
+.root :global(.appointment-list article),.root :global(.appointment-list article.featured){border-color:#ffffff13;background:linear-gradient(125deg,#14211e,#0d1715);color:#edf2ee;box-shadow:0 20px 55px #0004}
+.root :global(.appointment-list article.featured){border-color:#c9ff5847;background:radial-gradient(circle at 100% 0,#25483c,#111d19 50%,#0d1715)}
+.root :global(.appointments-feedback){border-color:#c9ff5838;background:#16251f;color:#c9e8d4}

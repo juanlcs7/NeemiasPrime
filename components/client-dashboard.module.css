@@ -519,3 +519,15 @@
 }
 
 @media(prefers-reduced-motion:reduce){.root :global(.portal-content),.root :global(.plans-page),.root :global(.profile-page),.root :global(.appointments-content){animation:none}.root :global(*){scroll-behavior:auto!important;transition-duration:.01ms!important}.root :global(.booking-head>span),.root :global(.booking-summary.ready>button){animation:none}}
+
+/* Destaques do catálogo e continuidade visual das páginas internas */
+.root :global(.booking-builder .service-catalog button.featured-service){border-color:#dda66f36;background:radial-gradient(circle at 0 0,#dda66f12,transparent 45%),linear-gradient(135deg,#172520,#101a17)}
+.root :global(.booking-builder .service-catalog button.featured-service .service-name small){color:#c29a72;letter-spacing:.35px}
+.root :global(.booking-builder .service-catalog button.featured-service.selected){border-color:#c9ff5875;background:linear-gradient(120deg,#20362d,#13211d)}
+.root:global(.profile-shell){background:radial-gradient(circle at 90% 5%,#245a4c66 0,transparent 29rem),radial-gradient(circle at 8% 65%,#8a593124 0,transparent 24rem),linear-gradient(145deg,#09100f,#111c19);color:#edf2ee}
+.root :global(.profile-intro){border:1px solid #dda66f30;background:radial-gradient(circle at 88% 0,#346d5e,#111d19 48%,#0a100f);box-shadow:0 32px 80px #0006}
+.root :global(.profile-form){border-color:#ffffff13;background:linear-gradient(145deg,#121d1a,#0c1513);box-shadow:0 28px 75px #0005}
+.root :global(.profile-form>section){border-bottom-color:#ffffff10}.root :global(.profile-form h2){color:#f3eadc}.root :global(.profile-form header p),.root :global(.profile-form>footer>div){color:#87958e}
+.root :global(.profile-fields label){color:#a4b0aa}.root :global(.profile-fields input){border-color:#ffffff16;background:#ffffff08;color:#edf2ee;color-scheme:dark}.root :global(.profile-fields input:disabled){background:#ffffff04;color:#75817b}
+.root :global(.profile-form>footer button){background:#dda66f;color:#18120d;box-shadow:0 15px 38px #0005}.root :global(.profile-form>footer button i){color:#1c2e24}
+.root :global(.profile-mobile-head){border-bottom-color:#ffffff12;background:#0a1311ef;color:#f0f4f1}

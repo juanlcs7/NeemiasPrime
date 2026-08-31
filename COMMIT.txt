@@ -1,4 +1,5 @@
-feat: estabiliza planos e renova experiência de agendamento
+feat: conclui agenda responsiva e ferramentas administrativas
 
-git add README.md COMMIT.txt package.json tsconfig.json next.config.ts app/admin/page.tsx app/api/admin/action/route.ts app/cliente/page.tsx app/cliente/agendamentos/page.tsx app/page.tsx components/admin-dashboard.tsx components/client-dashboard.tsx components/client-dashboard.module.css components/client-navigation.module.css lib/admin-token.ts supabase/migrations/20260831_final_stabilization.sql tests/critical-flows.test.mjs
-git commit -m "feat: estabiliza planos e renova experiência de agendamento"
+git add README.md COMMIT.txt package.json tsconfig.json next.config.ts app/admin/page.tsx app/api/admin/action/route.ts app/cliente/page.tsx app/cliente/agendamentos/page.tsx app/page.tsx components/admin-dashboard.tsx components/admin-dashboard.module.css components/appointments-dashboard.module.css components/client-dashboard.tsx components/client-dashboard.module.css components/client-navigation.module.css lib/admin-token.ts supabase/migrations/20260831_final_stabilization.sql supabase/migrations/20260901_admin_scheduling_tools.sql tests/critical-flows.test.mjs
+git add -f .env.example
+git commit -m "feat: conclui agenda responsiva e ferramentas administrativas"

@@ -1,4 +1,6 @@
+import "server-only";
 import { NextResponse } from "next/server";
+import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminAction =
@@ -7,18 +9,29 @@ type AdminAction =
   | { action:"professional_active"; professionalId:string; active:boolean }
   | { action:"membership_assign"; clientId:string; planId:string }
   | { action:"membership_renew"; membershipId:string }
-  | { action:"membership_remove"; membershipId:string };
+  | { action:"membership_remove"; membershipId:string }
+  | { action:"client_password"; clientId:string; password:string }
+  | { action:"walk_in_create"; clientId:string; professionalId:string; serviceId:string; startsAt:string }
+  | { action:"time_block_create"; professionalId:string; startsAt:string; durationMinutes:number; occurrences:number };
 
 const appointmentStatuses = ["scheduled","confirmed","completed","cancelled","no_show"];
-const uuid = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const uuid = (value: unknown): value is string => typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+const validDate = (value:unknown): value is string => typeof value === "string" && Number.isFinite(Date.parse(value));
 const failure = (message:string,status=400) => NextResponse.json({error:message},{status});
+
+function privilegedClient() {
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const secret=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(!url||!secret)return null;
+  return createSupabaseAdminClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+}
 
 export async function POST(request:Request) {
   const supabase = await createClient();
   const {data:{user},error:userError} = await supabase.auth.getUser();
   if (userError || !user) return failure("Faça login para continuar.",401);
 
-  // Reconfirma o cargo na sessão a cada alteração; o banco confirma de novo nos RPCs.
+  // O servidor confirma o cargo; cada RPC transacional confirma novamente no banco.
   const {data:profile} = await supabase.from("profiles").select("role").eq("id",user.id).single();
   if (profile?.role !== "admin") return failure("Acesso permitido somente para administradores.",403);
 
@@ -44,16 +57,26 @@ export async function POST(request:Request) {
 
   if (body.action === "membership_assign") {
     if (!uuid(body.clientId) || !uuid(body.planId)) return failure("Dados do plano inválidos.");
-    const {data,error} = await supabase.rpc("admin_assign_membership",{p_client_id:body.clientId,p_plan_id:body.planId}).single();
+    const {data,error} = await supabase.rpc("admin_assign_membership",{p_client_id:body.clientId,p_plan_id:body.planId});
     if (error) return failure(`Não foi possível atribuir o plano: ${error.message}`);
-    return NextResponse.json({ok:true,membership:data});
+    let membership=Array.isArray(data)?data[0]:data;
+    if(!membership)return failure("O banco não retornou o plano criado. Reexecute a migração de estabilização.",409);
+    // Compatibilidade com a função antiga, que retornava somente o UUID.
+    if(typeof membership==="string"){
+      const {data:row,error:rowError}=await supabase.from("memberships").select("id,client_id,plan_id,starts_on,ends_on,active,plans(name)").eq("id",membership).single();
+      if(rowError||!row)return failure("O plano foi atribuído, mas o banco ainda usa a função antiga. Execute 20260831_final_stabilization.sql.",409);
+      membership=row;
+    }
+    return NextResponse.json({ok:true,membership});
   }
 
   if (body.action === "membership_renew") {
     if (!uuid(body.membershipId)) return failure("Plano inválido.");
-    const {data,error} = await supabase.rpc("admin_renew_membership",{p_membership_id:body.membershipId}).single();
+    const {data,error} = await supabase.rpc("admin_renew_membership",{p_membership_id:body.membershipId});
     if (error) return failure(`Não foi possível renovar o plano: ${error.message}`);
-    return NextResponse.json({ok:true,membership:data});
+    const membership=Array.isArray(data)?data[0]:data;
+    if(!membership)return failure("O banco não retornou o ciclo renovado.",409);
+    return NextResponse.json({ok:true,membership});
   }
 
   if (body.action === "membership_remove") {
@@ -61,6 +84,31 @@ export async function POST(request:Request) {
     const {error} = await supabase.rpc("admin_remove_membership",{p_membership_id:body.membershipId});
     if (error) return failure(`Não foi possível remover o plano: ${error.message}`);
     return NextResponse.json({ok:true});
+  }
+
+  if(body.action==="client_password"){
+    if(!uuid(body.clientId)||typeof body.password!=="string"||body.password.length<8||body.password.length>72)return failure("A senha deve ter entre 8 e 72 caracteres.");
+    const admin=privilegedClient();
+    if(!admin)return failure("Configure SUPABASE_SECRET_KEY na Vercel para definir senhas.",503);
+    const {error}=await admin.auth.admin.updateUserById(body.clientId,{password:body.password});
+    if(error)return failure(`Não foi possível definir a senha: ${error.message}`);
+    return NextResponse.json({ok:true});
+  }
+
+  if(body.action==="walk_in_create"){
+    if(!uuid(body.clientId)||!uuid(body.professionalId)||!uuid(body.serviceId)||!validDate(body.startsAt))return failure("Dados do encaixe inválidos.");
+    const {data,error}=await supabase.rpc("admin_create_walk_in",{p_client_id:body.clientId,p_professional_id:body.professionalId,p_service_id:body.serviceId,p_starts_at:body.startsAt});
+    if(error)return failure(`Não foi possível criar o encaixe: ${error.message}`);
+    const {data:appointment,error:appointmentError}=await supabase.from("appointments").select("*,profiles!appointments_client_id_fkey(full_name,phone),professionals(id,name),services(name,price_cents,duration_minutes)").eq("id",data).single();
+    if(appointmentError||!appointment)return failure("O encaixe foi criado, mas não foi possível atualizar a agenda. Recarregue a página.",409);
+    return NextResponse.json({ok:true,appointmentId:data,appointment});
+  }
+
+  if(body.action==="time_block_create"){
+    if(!uuid(body.professionalId)||!validDate(body.startsAt)||!Number.isInteger(body.durationMinutes)||body.durationMinutes<30||body.durationMinutes>480||!Number.isInteger(body.occurrences)||body.occurrences<1||body.occurrences>52)return failure("Dados do bloqueio inválidos.");
+    const {data,error}=await supabase.rpc("admin_block_slots",{p_professional_id:body.professionalId,p_starts_at:body.startsAt,p_duration_minutes:body.durationMinutes,p_occurrences:body.occurrences});
+    if(error)return failure(`Não foi possível fechar o horário: ${error.message}`);
+    return NextResponse.json({ok:true,created:data});
   }
 
   if (body.action === "appointment_status") {

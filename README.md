@@ -54,6 +54,7 @@ No Windows, copie `.env.example`, renomeie a cópia para `.env.local` e preencha
 NEXT_PUBLIC_SUPABASE_URL=https://SEU-PROJETO.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_SUA_CHAVE
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SUPABASE_SECRET_KEY=sb_secret_SUA_CHAVE_SECRETA
 ```
 
 Abra <http://localhost:3000>.
@@ -76,11 +77,11 @@ Ao entrar novamente, aparecerá o acesso à Administração.
 
 1. Envie esta pasta para um repositório no GitHub.
 2. Na Vercel, clique em **Add New → Project** e importe o repositório.
-3. Cadastre as três variáveis do `.env.example` em **Settings → Environment Variables**.
+3. Cadastre as quatro variáveis do `.env.example` em **Settings → Environment Variables**.
 4. Em `NEXT_PUBLIC_SITE_URL`, use a URL da Vercel, sem barra no final.
 5. Faça o deploy e inclua a URL de callback da Vercel no Supabase. Essa mesma callback atende confirmação de cadastro e recuperação de senha.
 
-Não coloque a `service_role` key no navegador nem em variável `NEXT_PUBLIC_*`. Este projeto não precisa dela.
+Não coloque a chave secreta em variável `NEXT_PUBLIC_*`. A `SUPABASE_SECRET_KEY` é lida exclusivamente pela rota protegida do servidor que permite ao administrador criar ou trocar a senha de um cliente.
 
 ## Regras cadastradas
 
@@ -133,8 +134,18 @@ Na Vercel, confira somente os nomes destas variáveis (sem expor seus valores):
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SITE_URL`
+- `SUPABASE_SECRET_KEY`
 
-O painel administrativo usa a sessão autenticada normal e não precisa de `SUPABASE_SECRET_KEY` nem de `SUPABASE_SERVICE_ROLE_KEY`. Caso tenham sido criadas apenas para a versão anterior do painel, remova-as das variáveis de produção. Nenhuma chave secreta é enviada ao navegador.
+As operações comuns do painel usam a sessão autenticada normal. Somente a criação/troca administrativa de senha usa `SUPABASE_SECRET_KEY`, dentro de uma rota marcada como exclusiva do servidor; nenhuma chave secreta é enviada ao navegador. Prefira a nova chave `sb_secret_...` do Supabase e não use o nome `NEXT_PUBLIC_` nela.
+
+## Ferramentas administrativas de agenda (01/09/2026)
+
+Depois da estabilização final, execute também `supabase/migrations/20260901_admin_scheduling_tools.sql` no **SQL Editor**. Ela adiciona duas operações protegidas e transacionais ao painel:
+
+- encaixe de um cliente em um horário futuro, respeitando expediente, folgas e conflitos;
+- fechamento de um período específico, uma única vez ou com recorrência semanal.
+
+Na tela **Clientes**, o administrador também pode definir uma senha temporária. O campo começa com `Clienteprime123`, conforme a regra operacional solicitada; oriente o cliente a entrar em **Perfil → Segurança** e trocá-la após o primeiro acesso.
 
 Para validar localmente e na Vercel, com Node `22.x`:
 

@@ -51,3 +51,17 @@
 .proPortrait em{padding:4px 6px;border:1px solid #ffffff2a;border-radius:20px;background:#07120dbf;color:#d7ff8d;backdrop-filter:blur(6px)}
 .teamCard:hover .proPortrait img{transform:scale(1.045);filter:saturate(.98) contrast(1.04)}
 @media(max-width:560px){.proPortrait img{object-position:center 16%}}
+
+/* Encaixes, bloqueios e credenciais do cliente */
+.scheduleTools{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:18px}
+.scheduleTools form{padding:22px;border:1px solid #d8dfda;border-radius:17px;background:linear-gradient(145deg,#fff,#f7faf7);box-shadow:0 16px 42px #1733280d}
+.scheduleTools form:last-child{background:linear-gradient(145deg,#10271d,#08150f);color:white;border-color:#b9ff3827}
+.scheduleTools header span{color:#4d7b61;font-size:7px;font-weight:900;letter-spacing:1.7px}.scheduleTools form:last-child header span{color:var(--lime)}
+.scheduleTools h2{margin:7px 0 5px;font:500 23px Georgia,serif}.scheduleTools p{margin:0 0 18px;color:#748078;font-size:9px;line-height:1.5}.scheduleTools form:last-child p{color:#84968c}
+.scheduleTools form>div{display:grid;grid-template-columns:1fr 1fr;gap:10px}.scheduleTools label{display:flex;flex-direction:column;gap:6px;color:#627067;font-size:8px;font-weight:800}.scheduleTools form:last-child label{color:#9aaba1}
+.scheduleTools select,.scheduleTools input{width:100%;height:43px;padding:0 11px;border:1px solid #d7ded9;border-radius:9px;outline:0;background:white;color:#24332a;font-size:10px}.scheduleTools form:last-child select,.scheduleTools form:last-child input{border-color:#ffffff17;background:#ffffff08;color:#eef3ef;color-scheme:dark}
+.scheduleTools select:focus,.scheduleTools input:focus{border-color:#8dbb3d;box-shadow:0 0 0 3px #b9ff3818}
+.scheduleTools form>button{width:100%;height:44px;margin-top:13px;border:0;border-radius:9px;background:#17392a;color:white;font-size:9px;font-weight:900;cursor:pointer}.scheduleTools form:last-child>button{background:var(--lime);color:#102015}.scheduleTools button:disabled{opacity:.5;cursor:wait}
+.planControl>button{min-height:35px;margin:8px 7px 0 0;padding:0 11px;border:1px solid #b5c4ba;border-radius:8px;background:#f4f7f4;color:#365040;font-size:8px;font-weight:900;cursor:pointer}.planControl>button:hover{border-color:#79a934}.planControl>.passwordButton{border-color:#d6b48f;background:#fff7ef;color:#80552d}
+@media(max-width:1100px){.scheduleTools{grid-template-columns:1fr}}
+@media(max-width:560px){.scheduleTools form{padding:18px}.scheduleTools form>div{grid-template-columns:1fr}.scheduleTools h2{font-size:21px}.planControl>button{width:100%;margin-right:0}}
