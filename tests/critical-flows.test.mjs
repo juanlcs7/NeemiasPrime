@@ -31,8 +31,11 @@ test("migração protege planos expirados, cobertura por ID e histórico", async
 
 test("operações administrativas exigem sessão e cargo de administrador", async () => {
   const route = await read("app/api/admin/action/route.ts");
+  const dashboard = await read("components/admin-dashboard.tsx");
   assert.match(route, /import "server-only"/);
   assert.match(route, /supabase\.auth\.getUser\(\)/);
+  assert.match(route, /authenticated\.auth\.getUser\(accessToken\)/);
+  assert.match(dashboard, /Authorization=`Bearer \$\{session\.access_token\}`/);
   assert.match(route, /profile\?\.role !== "admin"/);
   assert.doesNotMatch(route, /Authorization:`Admin/);
   assert.match(route, /admin\.auth\.admin\.updateUserById/);

@@ -4,6 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import styles from "./admin-dashboard.module.css";
 
 type Item = Record<string, any>;
@@ -92,7 +93,10 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
   function notify(message: string) { setFeedback(message); window.setTimeout(() => setFeedback(""), 4000); }
 
   async function adminAction(payload:Record<string,unknown>){
-    const response=await fetch("/api/admin/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const {data:{session}}=await createClient().auth.getSession();
+    const headers:Record<string,string>={"Content-Type":"application/json"};
+    if(session?.access_token)headers.Authorization=`Bearer ${session.access_token}`;
+    const response=await fetch("/api/admin/action",{method:"POST",credentials:"include",cache:"no-store",headers,body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
     if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");
     return result;

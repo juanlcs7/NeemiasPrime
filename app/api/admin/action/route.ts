@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { createClient as createSupabaseAdminClient } from "@supabase/supabase-js";
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminAction =
@@ -23,12 +23,33 @@ function privilegedClient() {
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
   const secret=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
   if(!url||!secret)return null;
-  return createSupabaseAdminClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  return createSupabaseJsClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+}
+
+function bearerClient(accessToken:string) {
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if(!url||!key)return null;
+  return createSupabaseJsClient(url,key,{
+    global:{headers:{Authorization:`Bearer ${accessToken}`}},
+    auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
+  });
 }
 
 export async function POST(request:Request) {
-  const supabase = await createClient();
-  const {data:{user},error:userError} = await supabase.auth.getUser();
+  let supabase = await createClient();
+  let {data:{user},error:userError} = await supabase.auth.getUser();
+  const authorization=request.headers.get("authorization");
+  const accessToken=authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if((userError||!user)&&accessToken){
+    const authenticated=bearerClient(accessToken);
+    if(authenticated){
+      const verified=await authenticated.auth.getUser(accessToken);
+      user=verified.data.user;
+      userError=verified.error;
+      if(user)supabase=authenticated;
+    }
+  }
   if (userError || !user) return failure("Faça login para continuar.",401);
 
   // O servidor confirma o cargo; cada RPC transacional confirma novamente no banco.
