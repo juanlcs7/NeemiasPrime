@@ -35,7 +35,7 @@ test("operações administrativas exigem sessão e cargo de administrador", asyn
   assert.match(route, /import "server-only"/);
   assert.match(route, /supabase\.auth\.getUser\(\)/);
   assert.match(route, /authenticated\.auth\.getUser\(accessToken\)/);
-  assert.match(dashboard, /Authorization=`Bearer \$\{session\.access_token\}`/);
+  assert.match(dashboard, /Authorization=`Bearer \$\{currentToken\}`/);
   assert.match(route, /profile\?\.role !== "admin"/);
   assert.doesNotMatch(route, /Authorization:`Admin/);
   assert.match(route, /admin\.auth\.admin\.updateUserById/);
@@ -77,6 +77,17 @@ test("navegação interna conserva as cinco áreas e endereço legado redirecion
   const legacy = await read("app/cliente/agendamentos/page.tsx");
   for (const label of ["Início", "Agendar", "Horários", "Plano", "Perfil"]) assert.match(nav, new RegExp(label));
   assert.match(legacy, /redirect\("\/cliente#meus-agendamentos"\)/);
+});
+
+test("ações privadas reutilizam o token validado pelo servidor", async () => {
+  const clientPage=await read("app/cliente/page.tsx");
+  const adminPage=await read("app/admin/page.tsx");
+  const dashboard=await read("components/client-dashboard.tsx");
+  const supabaseClient=await read("lib/supabase/client.ts");
+  assert.match(clientPage, /accessToken=\{session\.access_token\}/);
+  assert.match(adminPage, /accessToken=\{session\.access_token\}/);
+  assert.match(dashboard, /const supabase=createAuthenticatedClient\(accessToken\);[\s\S]*supabase\.rpc\("create_appointment"/);
+  assert.match(supabaseClient, /Authorization:`Bearer \$\{accessToken\}`/);
 });
 
 test("agendamento oferece etapas navegáveis e layouts próprios para desktop e mobile", async () => {

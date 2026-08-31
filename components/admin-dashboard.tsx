@@ -36,7 +36,7 @@ const nav: { id: Tab; label: string; short: string }[] = [
   { id: "equipe", label: "Equipe", short: "EQ" },
 ];
 
-export default function AdminDashboard({ adminName, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
+export default function AdminDashboard({ accessToken, adminName, appointments: initialAppointments, services: initialServices, professionals: initialPros, plans, clients, memberships }: any) {
   const [tab, setTab] = useState<Tab>("overview");
   const [appointments, setAppointments] = useState<Item[]>(initialAppointments);
   const [services, setServices] = useState<Item[]>(initialServices);
@@ -95,7 +95,8 @@ export default function AdminDashboard({ adminName, appointments: initialAppoint
   async function adminAction(payload:Record<string,unknown>){
     const {data:{session}}=await createClient().auth.getSession();
     const headers:Record<string,string>={"Content-Type":"application/json"};
-    if(session?.access_token)headers.Authorization=`Bearer ${session.access_token}`;
+    const currentToken=session?.access_token||accessToken;
+    if(currentToken)headers.Authorization=`Bearer ${currentToken}`;
     const response=await fetch("/api/admin/action",{method:"POST",credentials:"include",cache:"no-store",headers,body:JSON.stringify(payload)});
     const result=await response.json().catch(()=>({error:"Resposta inválida do servidor."}));
     if(!response.ok)throw new Error(result.error||"Não foi possível concluir a alteração.");

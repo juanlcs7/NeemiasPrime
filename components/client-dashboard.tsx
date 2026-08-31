@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createAuthenticatedClient, createClient } from "@/lib/supabase/client";
 import AppointmentsDashboard from "@/components/appointments-dashboard";
 import { ClientMobileNav, ClientSection, ClientSidebar, ClientTopbar } from "@/components/client-navigation";
 import styles from "./client-dashboard.module.css";
@@ -13,7 +13,7 @@ type Plan = { id:string; name:string; price_cents:number; benefit_type:string; a
 type Appointment = { id:string; service_id:string; professional_id:string; starts_at:string; ends_at:string; status:string; payment_mode:string; services:{name:string;price_cents:number;duration_minutes:number}|null; professionals:{name:string}|null };
 type Profile = {full_name:string;phone:string|null;booking_blocked_until:string|null;role:string};
 type Membership = {active:boolean;starts_on:string;ends_on:string;plans:Plan|null};
-type Props = { profile:Profile|null; accountEmail:string; services:Service[]; professionals:Professional[]; appointments:Appointment[]; membership:Membership|null; plans:Plan[] };
+type Props = { accessToken:string; profile:Profile|null; accountEmail:string; services:Service[]; professionals:Professional[]; appointments:Appointment[]; membership:Membership|null; plans:Plan[] };
 type DayOption = { value:string; week:string; day:string; month:string; closed:boolean; today:boolean };
 
 const featuredServiceNames = ["corte","corte + barba","corte infantil","hidratacao","relaxamento capilar","sobrancelha"];
@@ -58,7 +58,7 @@ function nextSevenDays():DayOption[] {
   });
 }
 
-export default function ClientDashboard({profile:initialProfile,accountEmail,services,professionals,appointments:initial,membership,plans}:Props) {
+export default function ClientDashboard({accessToken,profile:initialProfile,accountEmail,services,professionals,appointments:initial,membership,plans}:Props) {
   const days = useMemo(()=>nextSevenDays(),[]);
   const orderedServices = useMemo(()=>[...services].sort((a,b)=>servicePriority(a.name)-servicePriority(b.name)),[services]);
   const [appointments,setAppointments] = useState(initial);
@@ -80,13 +80,13 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
   const selectedProfessional = professionals.find(item=>item.id===professional);
   const selectedDay = days.find(item=>item.value===date);
 
-  useEffect(()=>{if(!service||!professional||!date)return;let active=true;(async()=>{setLoading(true);setFeedback("");const {data,error}=await createClient().rpc("available_slots",{p_professional_id:professional,p_service_id:service,p_date:date});if(active){setSlots(error?[]:(data||[]).map((item:{starts_at:string})=>item.starts_at));setSlot("");setLoading(false);if(error)setFeedback("Não foi possível consultar a agenda agora.");}})();return()=>{active=false};},[service,professional,date]);
+  useEffect(()=>{if(!service||!professional||!date)return;let active=true;(async()=>{setLoading(true);setFeedback("");const {data,error}=await createAuthenticatedClient(accessToken).rpc("available_slots",{p_professional_id:professional,p_service_id:service,p_date:date});if(active){setSlots(error?[]:(data||[]).map((item:{starts_at:string})=>item.starts_at));setSlot("");setLoading(false);if(error)setFeedback("Não foi possível consultar a agenda agora.");}})();return()=>{active=false};},[accessToken,service,professional,date]);
   useEffect(()=>{const syncHash=()=>{const hash=window.location.hash;if(hash==="#meus-agendamentos"){setView("appointments");setActiveSection("appointments");window.scrollTo({top:0,behavior:"auto"});return;}if(hash==="#perfil"){setView("profile");setActiveSection("profile");window.scrollTo({top:0,behavior:"auto"});return;}if(hash==="#plano"){setView("plans");setActiveSection("plans");window.scrollTo({top:0,behavior:"auto"});return;}const booking=hash==="#agendar";setView("home");setActiveSection(booking?"booking":"home");window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{if(booking)document.getElementById("agendar")?.scrollIntoView({block:"start"});else window.scrollTo({top:0,behavior:"auto"});}));};const timer=window.setTimeout(syncHash,0);window.addEventListener("hashchange",syncHash);window.addEventListener("popstate",syncHash);return()=>{window.clearTimeout(timer);window.removeEventListener("hashchange",syncHash);window.removeEventListener("popstate",syncHash);};},[]);
   useEffect(()=>{if(view!=="home")return;const sync=()=>{const booking=document.getElementById("agendar");setActiveSection(booking&&window.scrollY>=booking.offsetTop-180?"booking":"home");};sync();window.addEventListener("scroll",sync,{passive:true});return()=>window.removeEventListener("scroll",sync);},[view]);
   async function book(){
     if(!slot||!selected||!selectedProfessional)return;
     setLoading(true);setFeedback("");
-    const supabase=createClient();
+    const supabase=createAuthenticatedClient(accessToken);
     const {data,error}=await supabase.rpc("create_appointment",{p_professional_id:professional,p_service_id:service,p_starts_at:slot,p_client_notes:null});
     if(error){setFeedback(error.message);setLoading(false);return;}
     const endsAt=new Date(new Date(slot).getTime()+Math.max(30,selected.duration_minutes)*60000).toISOString();
@@ -95,7 +95,7 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
     setAppointments(list=>[appointment,...list]);
     setSuccess(true);setLoading(false);
   }
-  async function cancel(id:string){if(!confirm("Cancelar este horário? Você poderá reagendar conforme a disponibilidade."))return;const {error}=await createClient().rpc("cancel_my_appointment",{p_appointment_id:id});if(error)setFeedback(error.message);else setAppointments(list=>list.map(item=>item.id===id?{...item,status:"cancelled"}:item));}
+  async function cancel(id:string){if(!confirm("Cancelar este horário? Você poderá reagendar conforme a disponibilidade."))return;const {error}=await createAuthenticatedClient(accessToken).rpc("cancel_my_appointment",{p_appointment_id:id});if(error)setFeedback(error.message);else setAppointments(list=>list.map(item=>item.id===id?{...item,status:"cancelled"}:item));}
   function pushClientHash(hash:string){if(window.location.hash!==hash)window.history.pushState(null,"",`/cliente${hash}`);}
   function showAppointments(){setActiveSection("appointments");pushClientHash("#meus-agendamentos");setView("appointments");window.scrollTo({top:0,behavior:"auto"});}
   function showProfile(){setActiveSection("profile");pushClientHash("#perfil");setView("profile");window.scrollTo({top:0,behavior:"auto"});}
@@ -108,8 +108,8 @@ export default function ClientDashboard({profile:initialProfile,accountEmail,ser
   function chooseProfessional(id:string){setProfessional(id);setSlot("");advanceBooking(3);}
   function chooseDate(value:string){setDate(value);setSlot("");advanceBooking(4);}
 
-  if(view==="appointments") return <AppointmentsDashboard profile={profile} appointments={appointments} professionals={professionals} onNavigate={navigateClient}/>;
-  if(view==="profile") return <ProfilePanel profile={profile} accountEmail={accountEmail} onUpdated={setProfile} onNavigate={navigateClient}/>;
+  if(view==="appointments") return <AppointmentsDashboard accessToken={accessToken} profile={profile} appointments={appointments} professionals={professionals} onNavigate={navigateClient}/>;
+  if(view==="profile") return <ProfilePanel accessToken={accessToken} profile={profile} accountEmail={accountEmail} onUpdated={setProfile} onNavigate={navigateClient}/>;
   if(view==="plans") return <PlansPanel profile={profile} membership={membership} plans={plans} onNavigate={navigateClient}/>;
   const morning=slots.filter(item=>Number(time(item).slice(0,2))<12), afternoon=slots.filter(item=>{const h=Number(time(item).slice(0,2));return h>=12&&h<18}), evening=slots.filter(item=>Number(time(item).slice(0,2))>=18);
 
@@ -156,7 +156,7 @@ function PlansPanel({profile,membership,plans,onNavigate}:{profile:Profile|null;
   </main>;
 }
 
-function ProfilePanel({profile,accountEmail,onUpdated,onNavigate}:{profile:Profile|null;accountEmail:string;onUpdated:(profile:Profile|null)=>void;onNavigate:(section:ClientSection)=>void}) {
+function ProfilePanel({accessToken,profile,accountEmail,onUpdated,onNavigate}:{accessToken:string;profile:Profile|null;accountEmail:string;onUpdated:(profile:Profile|null)=>void;onNavigate:(section:ClientSection)=>void}) {
   const [fullName,setFullName]=useState(profile?.full_name||"");
   const [phone,setPhone]=useState(profile?.phone||"");
   const [password,setPassword]=useState("");
@@ -171,13 +171,13 @@ function ProfilePanel({profile,accountEmail,onUpdated,onNavigate}:{profile:Profi
     if(password&&password.length<6){setError("A nova senha precisa ter pelo menos 6 caracteres.");return;}
     if(password!==confirmation){setError("As senhas não são iguais.");return;}
     setSaving(true);
-    const supabase=createClient();
-    const {data:{user}}=await supabase.auth.getUser();
+    const supabase=createAuthenticatedClient(accessToken);
+    const {data:{user}}=await supabase.auth.getUser(accessToken);
     if(!user){setError("Sua sessão expirou. Entre novamente para continuar.");setSaving(false);return;}
     const cleanName=fullName.trim(); const cleanPhone=phone.trim()||null;
     const {error:profileError}=await supabase.from("profiles").update({full_name:cleanName,phone:cleanPhone}).eq("id",user.id);
     if(profileError){setError("Não foi possível atualizar seus dados agora.");setSaving(false);return;}
-    if(password){const {error:passwordError}=await supabase.auth.updateUser({password});if(passwordError){setError("Os dados foram salvos, mas não foi possível alterar a senha.");setSaving(false);return;}}
+    if(password){const {error:passwordError}=await createClient().auth.updateUser({password});if(passwordError){setError("Os dados foram salvos, mas não foi possível alterar a senha.");setSaving(false);return;}}
     onUpdated(profile?{...profile,full_name:cleanName,phone:cleanPhone}:profile);
     setPassword("");setConfirmation("");setMessage("Perfil atualizado com sucesso.");setSaving(false);
   }
